@@ -1,23 +1,27 @@
 // src/components/ChatVoiceScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Button, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
 import axios from 'axios';
-
-// 주의: Buffer를 사용하기 위해 'buffer' 패키지가 필요할 수 있습니다.
-// expo에서는 global.Buffer가 정의되어 있지 않으면, import { Buffer } from 'buffer'; 하고 global.Buffer = Buffer; 해줄 수 있습니다.
 import { Buffer } from 'buffer';
 if (!global.Buffer) global.Buffer = Buffer;
 
+// 웹에서 파일 업로드를 위한 React import
+import ReactDOM from 'react-dom';
+
 const ChatVoiceScreen = () => {
+  // 모바일용 녹음 상태
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  // 웹용 업로드한 오디오 파일의 base64 문자열 (녹음 기능 미지원 시 사용)
+  const [webAudio, setWebAudio] = useState<string>('');
+
   const [loading, setLoading] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
   const [aiResponseText, setAiResponseText] = useState('');
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  // 1. 사용자의 음성을 녹음 시작
+  // 모바일: 녹음 시작
   const startRecording = async () => {
     try {
       const permission = await Audio.requestPermissionsAsync();
@@ -29,7 +33,6 @@ const ChatVoiceScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      
       const { recording } = await Audio.Recording.createAsync(
         Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
       );
@@ -39,7 +42,7 @@ const ChatVoiceScreen = () => {
     }
   };
 
-  // 2. 녹음 중지 및 녹음 파일을 처리하여 STT, Chat, TTS 순차 처리
+  // 모바일: 녹음 중지 후 처리 (STT → Chat → TTS)
   const stopAndProcessRecording = async () => {
     if (!recording) return;
     setLoading(true);
@@ -50,32 +53,74 @@ const ChatVoiceScreen = () => {
         alert('녹음 파일을 찾을 수 없습니다.');
         return;
       }
-      // 녹음 파일을 base64 문자열로 변환 (STT에 전송)
+      // 녹음 파일을 base64 문자열로 변환
       const base64Audio = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      
-      // 2-1. STT: 녹음된 음성을 텍스트로 변환 (백엔드 STT 엔드포인트 호출)
+      await processAudio(base64Audio);
+    } catch (error) {
+      console.error('모바일 음성 처리 에러:', error);
+    } finally {
+      setLoading(false);
+      setRecording(null);
+    }
+  };
+
+  // 웹: 파일 업로드 처리
+  const handleFileInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // FileReader 결과는 data URL 형식으로 반환되므로, 콤마 이후 부분을 추출
+        const result = reader.result as string;
+        const base64String = result.split(',')[1];
+        setWebAudio(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 웹: 업로드된 오디오를 처리 (STT → Chat → TTS)
+  const processWebAudio = async () => {
+    if (!webAudio) {
+      alert('먼저 오디오 파일을 선택하세요.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await processAudio(webAudio);
+    } catch (error) {
+      console.error('웹 음성 처리 에러:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 공통 처리 로직: STT → Chat → TTS 순으로 처리
+  const processAudio = async (base64Audio: string) => {
+    try {
+      // 1. STT: 음성을 텍스트로 변환 (백엔드 STT 엔드포인트 호출)
       const sttResponse = await axios.post(
-        'http://192.168.124.100:3000/api/speech/stt',
+        'http://YOUR_PC_IP:3000/api/speech/stt',
         { audio: base64Audio },
         { headers: { 'Content-Type': 'application/json' } }
       );
       const userText = sttResponse.data.text;
       setTranscribedText(userText);
 
-      // 2-2. Chat: 변환된 텍스트를 이용하여 AI 응답(텍스트) 생성 (백엔드 Chat 엔드포인트 호출)
+      // 2. Chat: 변환된 텍스트를 이용하여 AI 응답 생성 (백엔드 Chat 엔드포인트 호출)
       const chatResponse = await axios.post(
-        'http://192.168.124.100:3000/api/chat',
+        'http://YOUR_PC_IP:3000/api/chat',
         { message: userText, strategy: 'default', sessionId: 'session123' },
         { headers: { 'Content-Type': 'application/json' } }
       );
       const aiText = chatResponse.data.response;
       setAiResponseText(aiText);
 
-      // 2-3. TTS: AI 응답 텍스트를 음성으로 변환 (백엔드 TTS 엔드포인트 호출)
+      // 3. TTS: AI 응답 텍스트를 음성으로 변환 (백엔드 TTS 엔드포인트 호출)
       const ttsResponse = await axios.post(
-        'http://192.168.124.100:3000/api/speech/tts',
+        'http://YOUR_PC_IP:3000/api/speech/tts',
         { text: aiText },
         {
           headers: { 'Content-Type': 'application/json' },
@@ -84,32 +129,44 @@ const ChatVoiceScreen = () => {
       );
       // 받은 바이너리 데이터를 base64 문자열로 변환
       const audioBase64 = Buffer.from(ttsResponse.data, 'binary').toString('base64');
-
-      // TTS 결과 오디오를 임시 파일로 저장 (예: .wav 파일, TTS 출력 포맷에 맞게 확장자 조정)
+      // 임시 파일에 저장 (파일 형식은 TTS 모델 출력 포맷에 맞게 조정)
       const audioUri = FileSystem.cacheDirectory + 'ttsAudio.wav';
-      await FileSystem.writeAsStringAsync(audioUri, audioBase64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      await FileSystem.writeAsStringAsync(audioUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
 
-      // Expo Audio를 사용하여 오디오 파일을 로드하고 재생
+      // 오디오 파일을 로드 및 재생
       const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
       setSound(sound);
       await sound.playAsync();
-
     } catch (error) {
-      console.error('음성 대화 처리 에러:', error);
-    } finally {
-      setLoading(false);
-      setRecording(null);
+      console.error('processAudio 에러:', error);
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>AI와 자연스러운 음성 대화하기</Text>
-      <Button title="녹음 시작" onPress={startRecording} />
-      <Button title="녹음 중지 및 처리" onPress={stopAndProcessRecording} disabled={!recording || loading} />
+      
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      
+      {Platform.OS === 'web' ? (
+        // 웹: 파일 업로드 UI
+        <View style={styles.webContainer}>
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={handleFileInput}
+            style={styles.fileInput}
+          />
+          <Button title="선택된 오디오 처리" onPress={processWebAudio} disabled={loading || !webAudio} />
+        </View>
+      ) : (
+        // 모바일: 녹음 UI
+        <View style={styles.mobileContainer}>
+          <Button title="녹음 시작" onPress={startRecording} disabled={loading || recording !== null} />
+          <Button title="녹음 중지 및 처리" onPress={stopAndProcessRecording} disabled={loading || !recording} />
+        </View>
+      )}
+      
       <Text style={styles.label}>내 음성 (STT 결과):</Text>
       <Text style={styles.text}>{transcribedText}</Text>
       <Text style={styles.label}>AI 응답 (텍스트):</Text>
@@ -137,7 +194,20 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     fontSize: 16,
     textAlign: 'center'
-  }
+  },
+  mobileContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  webContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  fileInput: {
+    marginVertical: 10,
+  },
 });
 
 export default ChatVoiceScreen;
