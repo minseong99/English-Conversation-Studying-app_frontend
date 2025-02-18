@@ -57,7 +57,7 @@ const ChatVoiceScreen = () => {
       
       // 2-1. STT: 녹음된 음성을 텍스트로 변환 (백엔드 STT 엔드포인트 호출)
       const sttResponse = await axios.post(
-        'http://YOUR_PC_IP:3000/api/speech/stt',
+        'http://192.168.124.100:3000/api/speech/stt',
         { audio: base64Audio },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -66,7 +66,7 @@ const ChatVoiceScreen = () => {
 
       // 2-2. Chat: 변환된 텍스트를 이용하여 AI 응답(텍스트) 생성 (백엔드 Chat 엔드포인트 호출)
       const chatResponse = await axios.post(
-        'http://YOUR_PC_IP:3000/api/chat',
+        'http://192.168.124.100:3000/api/chat',
         { message: userText, strategy: 'default', sessionId: 'session123' },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -75,7 +75,7 @@ const ChatVoiceScreen = () => {
 
       // 2-3. TTS: AI 응답 텍스트를 음성으로 변환 (백엔드 TTS 엔드포인트 호출)
       const ttsResponse = await axios.post(
-        'http://YOUR_PC_IP:3000/api/speech/tts',
+        'http://192.168.124.100:3000/api/speech/tts',
         { text: aiText },
         {
           headers: { 'Content-Type': 'application/json' },
