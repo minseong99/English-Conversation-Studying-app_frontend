@@ -29,6 +29,7 @@ const ChatVoiceScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
+      
       const { recording } = await Audio.Recording.createAsync(
         Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
       );
