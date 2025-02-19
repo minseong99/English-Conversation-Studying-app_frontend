@@ -116,7 +116,7 @@ const startRecordingWeb = async () => {
     setAudioChunks([]); // 기존 청크 초기화
     
     // 일정 간격(예: 1000ms)마다 데이터 청크를 수집하도록 지정
-    recorder.start(1000);
+    recorder.start(500);
     
     recorder.ondataavailable = (event: BlobEvent) => {
       if (event.data && event.data.size > 0) {
