@@ -7,6 +7,16 @@ import { Audio } from 'expo-av';
 import { Buffer } from 'buffer';
 if (!global.Buffer) global.Buffer = Buffer;
 
+function base64ToBlob(base64: string, mime: string): Blob {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mime });
+}
+
 const ChatVoiceScreen = () => {
   // 모바일용 녹음 (Expo Audio)
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -17,6 +27,7 @@ const ChatVoiceScreen = () => {
   const [loading, setLoading] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
   const [aiResponseText, setAiResponseText] = useState('');
+  // 모바일 재생용 상태
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   // 공통: STT, Chat, TTS 처리 함수
@@ -45,20 +56,33 @@ const ChatVoiceScreen = () => {
         'http://192.168.124.100:3000/api/speech/tts',
         { text: aiText },
         {
-          headers: { 'Content-Type': 'application/json' },
-          responseType: 'arraybuffer',
+          headers: { 'Content-Type': 'application/json' }
         }
       );
       // 변환된 바이너리 데이터를 base64 문자열로 변환
-      const audioBase64 = Buffer.from(ttsResponse.data, 'binary').toString('base64');
-      // 임시 파일 경로 (TTS 모델 출력 형식에 따라 확장자 조정)
-      const audioUri = FileSystem.cacheDirectory + 'ttsAudio.wav';
-      await FileSystem.writeAsStringAsync(audioUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
-      
-      // 오디오 재생
-      const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
-      setSound(sound);
-      await sound.playAsync();
+      const audioBase64 = ttsResponse.data.audio;
+      console.log(ttsResponse.data.audio);
+      if (Platform.OS === 'web') {
+        // 웹: base64 -> Blob -> Object URL -> 자동 재생 및 재생 종료 시 URL 해제
+        const audioBlob = base64ToBlob(audioBase64, 'audio/wav');
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElem = new Audio(audioUrl);
+        audioElem.play().then(() => {
+          audioElem.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            console.log('Audio playback ended and URL revoked.');
+          };
+        }).catch((error) => {
+          console.error("Audio play error:", error);
+        });
+      } else {
+        // 모바일: 임시 파일에 저장 후 Expo Audio 재생
+        const audioUri = FileSystem.cacheDirectory + 'ttsAudio.wav';
+        await FileSystem.writeAsStringAsync(audioUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
+        const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
+        setSound(sound);
+        await sound.playAsync();
+      }
     } catch (error) {
       console.error('processAudio 에러:', error);
     }
@@ -94,7 +118,6 @@ const ChatVoiceScreen = () => {
         alert('녹음 파일을 찾을 수 없습니다.');
         return;
       }
-      // 녹음 파일을 base64 문자열로 변환
       const base64Audio = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
@@ -107,74 +130,59 @@ const ChatVoiceScreen = () => {
     }
   };
 
-// 웹: 녹음 시작 (MediaRecorder 사용)
-const startRecordingWeb = async () => {
-  try {
-    // 마이크 사용 권한 요청
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    setAudioChunks([]); // 기존 청크 초기화
-    
-    // 일정 간격(예: 1000ms)마다 데이터 청크를 수집하도록 지정
-    recorder.start(500);
-    
-    recorder.ondataavailable = (event: BlobEvent) => {
-      if (event.data && event.data.size > 0) {
-        setAudioChunks((prev) => [...prev, event.data]);
-      }
-    };
-
-    // 녹음이 종료되었을 때 처리할 onstop 이벤트 (추가로 확인용)
-    recorder.onstop = () => {
-      console.log('녹음이 종료되었습니다. 수집된 청크 수:', audioChunks.length);
-    };
-
-    setMediaRecorder(recorder);
-  } catch (error) {
-    console.error('웹 녹음 시작 에러:', error);
-  }
-};
-
-// 웹: 녹음 중지 후 처리
-const stopRecordingWeb = async () => {
-  if (!mediaRecorder) return;
-  setLoading(true);
-  try {
-    // 녹음 중지를 하고 onstop 이벤트가 발생할 때까지 대기
-    await new Promise<void>((resolve) => {
-      mediaRecorder.onstop = () => {
-        console.log('MediaRecorder onstop 이벤트 발생');
-        resolve();
+  // 웹: 녹음 시작 (MediaRecorder 사용)
+  const startRecordingWeb = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setAudioChunks([]); // 기존 청크 초기화
+      recorder.start(500); // 500ms 간격으로 청크 생성
+      recorder.ondataavailable = (event: BlobEvent) => {
+        if (event.data && event.data.size > 0) {
+          setAudioChunks((prev) => [...prev, event.data]);
+        }
       };
-      mediaRecorder.stop();
-    });
-
-    // 수집된 청크들을 Blob으로 합침
-    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-    console.log('생성된 Blob 크기:', blob.size);
-    
-    // FileReader를 사용해 Blob을 data URL로 변환하고 base64 부분만 추출
-    const base64Audio = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        // data URL 형식에서 콤마 이후의 부분만 추출
-        resolve(result.split(',')[1]);
+      recorder.onstop = () => {
+        console.log('녹음 종료됨, 청크 수:', audioChunks.length);
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    
-    console.log('생성된 base64 문자열 길이:', base64Audio.length);
-    await processAudio(base64Audio);
-  } catch (error) {
-    console.error('웹 녹음 처리 에러:', error);
-  } finally {
-    setLoading(false);
-    setMediaRecorder(null);
-  }
-};
+      setMediaRecorder(recorder);
+    } catch (error) {
+      console.error('웹 녹음 시작 에러:', error);
+    }
+  };
 
+  // 웹: 녹음 중지 후 처리
+  const stopRecordingWeb = async () => {
+    if (!mediaRecorder) return;
+    setLoading(true);
+    try {
+      await new Promise<void>((resolve) => {
+        mediaRecorder.onstop = () => {
+          console.log('MediaRecorder onstop 이벤트 발생');
+          resolve();
+        };
+        mediaRecorder.stop();
+      });
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      console.log('생성된 Blob 크기:', blob.size);
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]); // data URL에서 base64 부분 추출
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      console.log('생성된 base64 문자열 길이:', base64Audio.length);
+      await processAudio(base64Audio);
+    } catch (error) {
+      console.error('웹 녹음 처리 에러:', error);
+    } finally {
+      setLoading(false);
+      setMediaRecorder(null);
+    }
+  };
 
   return (
     <View style={styles.container}>
