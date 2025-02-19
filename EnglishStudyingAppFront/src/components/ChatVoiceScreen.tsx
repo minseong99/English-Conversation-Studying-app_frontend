@@ -59,14 +59,20 @@ const ChatVoiceScreen = () => {
           headers: { 'Content-Type': 'application/json' }
         }
       );
+
+      
+
       // 변환된 바이너리 데이터를 base64 문자열로 변환
       const audioBase64 = ttsResponse.data.audio;
-      console.log(ttsResponse.data.audio);
+
+
       if (Platform.OS === 'web') {
         // 웹: base64 -> Blob -> Object URL -> 자동 재생 및 재생 종료 시 URL 해제
         const audioBlob = base64ToBlob(audioBase64, 'audio/wav');
+
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audioElem = new Audio(audioUrl);
+       
+        const audioElem = new window.Audio(audioUrl);
         audioElem.play().then(() => {
           audioElem.onended = () => {
             URL.revokeObjectURL(audioUrl);
