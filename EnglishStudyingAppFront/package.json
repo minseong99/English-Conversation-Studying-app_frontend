@@ -1,0 +1,43 @@
+{
+  "name": "englishstudyingappfront",
+  "license": "0BSD",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+    }
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~4.0.1",
+    "@react-navigation/native": "^7.0.14",
+    "@react-navigation/stack": "^7.1.1",
+    "axios": "^1.7.9",
+    "expo": "^52.0.35",
+    "expo-av": "^15.0.2",
+    "expo-status-bar": "~2.0.1",
+    "react": "18.3.1",
+    "react-dom": "^18.3.1",
+    "react-media-recorder": "^1.7.1",
+    "react-native": "0.76.7",
+    "react-native-web": "^0.19.13",
+    "react-test-renderer": "18.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@testing-library/react-native": "^13.0.1",
+    "@types/react": "~18.3.12",
+    "@types/react-native": "^0.72.8",
+    "jest-expo": "^52.0.4",
+    "typescript": "^5.3.3"
+  },
+  "private": true
+}
