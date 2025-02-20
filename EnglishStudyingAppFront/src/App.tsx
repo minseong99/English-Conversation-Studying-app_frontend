@@ -13,10 +13,10 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="MainMenu">
-        <Stack.Screen name="MainMenu" component={MainMenuScreen} options={{ title: "메인 메뉴" }} />
-        <Stack.Screen name="SpeakerSelection" component={SpeakerSelectionScreen} options={{ title: "화자 선택" }} />
-        <Stack.Screen name="ChatVoice" component={ChatVoiceScreen} options={{ title: "음성 대화" }} />
-        <Stack.Screen name="ChatText" component={ChatScreen} options={{ title: "텍스트 대화" }} />
+        <Stack.Screen name="MainMenu" component={MainMenuScreen} options={{ title: "StudyingApp" }} />
+        <Stack.Screen name="SpeakerSelection" component={SpeakerSelectionScreen} options={{ title: "Select model" }} />
+        <Stack.Screen name="ChatVoice" component={ChatVoiceScreen} options={{ title: "Voice chat" }} />
+        <Stack.Screen name="ChatText" component={ChatScreen} options={{ title: "Text chat" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
