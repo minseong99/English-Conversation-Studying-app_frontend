@@ -19,29 +19,24 @@ function base64ToBlob(base64: string, mime: string): Blob {
 }
 
 const ChatVoiceScreen = () => {
-
   const route = useRoute();
-  const { speaker } = route.params as { speaker: string }; // 선택한 화자 정보
+  const { speaker } = route.params as { speaker: string };
 
-  // 녹음 관련 상태
+  // 녹음 및 대화 관련 상태
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<BlobPart[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
 
-  // 대화 내역 및 단일 메시지 상태
   const [transcribedText, setTranscribedText] = useState('');
   const [aiResponseText, setAiResponseText] = useState('');
   const [conversationHistory, setConversationHistory] = useState<{ sender: string, text: string }[]>([]);
   const [showHistory, setShowHistory] = useState(true);
-
-  // 모바일 재생용 상태
   const [sound, setSound] = useState<Audio.Sound | null>(null);
-
 
   const myIp = '192.168.124.100';
   const sessionId = 'session123';
-  // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
   const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -52,29 +47,94 @@ const ChatVoiceScreen = () => {
     return unsubscribe;
   }, [navigation, sessionId]);
 
-
-  // 토글 버튼 핸들러: 대화 내역 보이기/숨기기
   const toggleHistory = () => {
     setShowHistory(prev => !prev);
   };
 
-  // 공통 처리 함수: STT, Chat, TTS 및 대화 내역 업데이트
-  const processAudioWithHistory = async (base64Audio: string) => {
+  // STT 요청을 수행하는 헬퍼 함수 (에러 발생 시 모델 로딩 처리)
+  const performSTT = async (base64Audio: string) => {
     try {
-      // 1. STT: 음성을 텍스트로 변환
-      const sttResponse = await axios.post(
-        'http://192.168.124.100:3000/api/speech/stt',
+      const response = await axios.post(
+        `http://${myIp}:3000/api/speech/stt`,
         { audio: base64Audio },
         { headers: { 'Content-Type': 'application/json' } }
       );
+      return response;
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error &&
+        error.response.data.error.includes('currently loading')
+      ) {
+        const estimatedTime = error.response.data.estimated_time || 20;
+        setLoading(true);
+        setLoadingMessage(`STT 모델이 로딩 중입니다. 약 ${estimatedTime}초 후에 재시도합니다.`);
+        // estimatedTime 동안 대기 후 재시도
+        await new Promise(resolve => setTimeout(resolve, estimatedTime * 1000));
+        setLoading(false);
+        setLoadingMessage('');
+        // 재시도
+        const retryResponse = await axios.post(
+          `http://${myIp}:3000/api/speech/stt`,
+          { audio: base64Audio },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        return retryResponse;
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  // TTS 요청을 수행하는 헬퍼 함수 (에러 발생 시 모델 로딩 처리)
+  const performTTS = async (text: string, speaker: string) => {
+    try {
+      const response = await axios.post(
+        `http://${myIp}:3000/api/speech/tts`,
+        { text, speaker },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      return response;
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error &&
+        error.response.data.error.includes('currently loading')
+      ) {
+        const estimatedTime = error.response.data.estimated_time || 20;
+        setLoading(true);
+        setLoadingMessage(`TTS 모델이 로딩 중입니다. 약 ${estimatedTime}초 후에 재시도합니다.`);
+        await new Promise(resolve => setTimeout(resolve, estimatedTime * 1000));
+        setLoading(false);
+        setLoadingMessage('');
+        // 재시도
+        const retryResponse = await axios.post(
+          `http://${myIp}:3000/api/speech/tts`,
+          { text, speaker },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        return retryResponse;
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  // STT, Chat, TTS 순으로 요청을 처리하고 대화 내역을 업데이트
+  const processAudioWithHistory = async (base64Audio: string) => {
+    try {
+      // 1. STT: 음성을 텍스트로 변환
+      const sttResponse = await performSTT(base64Audio);
       const userText = sttResponse.data.text;
       setTranscribedText(userText);
       setConversationHistory(prev => [...prev, { sender: 'User', text: userText }]);
 
       // 2. Chat: 사용자 텍스트를 이용해 AI 응답 생성
       const chatResponse = await axios.post(
-        'http://192.168.124.100:3000/api/chat',
-        { message: userText, strategy: 'default', sessionId: sessionId },
+        `http://${myIp}:3000/api/chat`,
+        { message: userText, strategy: 'default', sessionId },
         { headers: { 'Content-Type': 'application/json' } }
       );
       const aiText = chatResponse.data.response;
@@ -82,17 +142,11 @@ const ChatVoiceScreen = () => {
       setConversationHistory(prev => [...prev, { sender: 'AI', text: aiText }]);
 
       // 3. TTS: AI 응답 텍스트를 음성으로 변환
-      const ttsResponse = await axios.post(
-        'http://192.168.124.100:3000/api/speech/tts',
-        { text: aiText, speaker},
-        { headers: { 'Content-Type': 'application/json' }}
-      );
+      const ttsResponse = await performTTS(aiText, speaker);
       const audioBase64 = ttsResponse.data.audio;
 
-
-      
+      // 음성 재생 (웹/모바일 분기)
       if (Platform.OS === 'web') {
-        // 웹: base64 -> Blob -> Object URL -> 자동 재생
         const audioBlob = base64ToBlob(audioBase64, 'audio/wav');
         const audioUrl = URL.createObjectURL(audioBlob);
         const audioElem = new window.Audio(audioUrl);
@@ -105,7 +159,6 @@ const ChatVoiceScreen = () => {
           console.error("Auto audio play error:", error);
         });
       } else {
-        // 모바일: 임시 파일에 저장 후 Expo Audio 재생
         const audioUri = FileSystem.cacheDirectory + 'ttsAudio.wav';
         await FileSystem.writeAsStringAsync(audioUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
         const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
@@ -195,7 +248,6 @@ const ChatVoiceScreen = () => {
         mediaRecorder.stop();
       });
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
-      console.log('생성된 Blob 크기:', blob.size);
       const base64Audio = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -205,7 +257,6 @@ const ChatVoiceScreen = () => {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-      console.log('생성된 base64 문자열 길이:', base64Audio.length);
       await processAudioHandler(base64Audio);
     } catch (error) {
       console.error('웹 녹음 처리 에러:', error);
@@ -216,31 +267,38 @@ const ChatVoiceScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>음성 대화하기</Text>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      {Platform.OS === 'web' ? (
-        <View style={styles.buttonContainer}>
-          <Button title="web voice start" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
-          <Button title="stop" onPress={stopRecordingWebHandler} disabled={loading || mediaRecorder === null} />
-        </View>
-      ) : (
-        <View style={styles.buttonContainer}>
-          <Button title="mobile voice start" onPress={startRecordingMobile} disabled={loading || recording !== null} />
-          <Button title="stop" onPress={stopRecordingMobileHandler} disabled={loading || recording === null} />
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>음성 대화하기</Text>
+        {Platform.OS === 'web' ? (
+          <View style={styles.buttonContainer}>
+            <Button title="web voice start" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
+            <Button title="stop" onPress={stopRecordingWebHandler} disabled={loading || mediaRecorder === null} />
+          </View>
+        ) : (
+          <View style={styles.buttonContainer}>
+            <Button title="mobile voice start" onPress={startRecordingMobile} disabled={loading || recording !== null} />
+            <Button title="stop" onPress={stopRecordingMobileHandler} disabled={loading || recording === null} />
+          </View>
+        )}
+        <Button title={showHistory ? "hide text" : "show text"} onPress={toggleHistory} />
+        {showHistory && (
+          <ScrollView style={styles.historyContainer}>
+            {conversationHistory.map((msg, index) => (
+              <Text key={index} style={styles.historyText}>
+                {msg.sender}: {msg.text}
+              </Text>
+            ))}
+          </ScrollView>
+        )}
+      </ScrollView>
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.loadingText}>{loadingMessage || "모델 로딩 중입니다. 잠시만 기다려주세요..."}</Text>
         </View>
       )}
-      <Button title={showHistory ? "hide text" : "show text"} onPress={toggleHistory} />
-      {showHistory && (
-        <ScrollView style={styles.historyContainer}>
-          {conversationHistory.map((msg, index) => (
-            <Text key={index} style={styles.historyText}>
-              {msg.sender}: {msg.text}
-            </Text>
-          ))}
-        </ScrollView>
-      )}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -252,6 +310,19 @@ const styles = StyleSheet.create({
   text: { marginVertical: 10, fontSize: 16, textAlign: 'center' },
   historyContainer: { marginTop: 20, width: '100%', maxHeight: 200, borderWidth: 1, padding: 10 },
   historyText: { fontSize: 14, marginVertical: 2 },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#fff',
+    fontSize: 16,
+  },
 });
 
 export default ChatVoiceScreen;
