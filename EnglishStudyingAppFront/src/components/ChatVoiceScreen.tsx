@@ -1,7 +1,7 @@
 // src/components/ChatVoiceScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Platform, ScrollView } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
@@ -38,6 +38,21 @@ const ChatVoiceScreen = () => {
   // 모바일 재생용 상태
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
+
+  const myIp = '192.168.124.100';
+  const sessionId = 'session123';
+  // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
+  const navigation = useNavigation();
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      axios.delete(`http://${myIp}:3000/api/session/${sessionId}`)
+        .then(() => console.log("Session cleared"))
+        .catch((err) => console.error("Session clear error:", err));
+    });
+    return unsubscribe;
+  }, [navigation, sessionId]);
+
+
   // 토글 버튼 핸들러: 대화 내역 보이기/숨기기
   const toggleHistory = () => {
     setShowHistory(prev => !prev);
@@ -59,7 +74,7 @@ const ChatVoiceScreen = () => {
       // 2. Chat: 사용자 텍스트를 이용해 AI 응답 생성
       const chatResponse = await axios.post(
         'http://192.168.124.100:3000/api/chat',
-        { message: userText, strategy: 'default', sessionId: 'session123' },
+        { message: userText, strategy: 'default', sessionId: sessionId },
         { headers: { 'Content-Type': 'application/json' } }
       );
       const aiText = chatResponse.data.response;
@@ -206,16 +221,16 @@ const ChatVoiceScreen = () => {
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {Platform.OS === 'web' ? (
         <View style={styles.buttonContainer}>
-          <Button title="웹 녹음 시작" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
-          <Button title="웹 녹음 중지 및 처리" onPress={stopRecordingWebHandler} disabled={loading || mediaRecorder === null} />
+          <Button title="web voice start" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
+          <Button title="stop" onPress={stopRecordingWebHandler} disabled={loading || mediaRecorder === null} />
         </View>
       ) : (
         <View style={styles.buttonContainer}>
-          <Button title="모바일 녹음 시작" onPress={startRecordingMobile} disabled={loading || recording !== null} />
-          <Button title="모바일 녹음 중지 및 처리" onPress={stopRecordingMobileHandler} disabled={loading || recording === null} />
+          <Button title="mobile voice start" onPress={startRecordingMobile} disabled={loading || recording !== null} />
+          <Button title="stop" onPress={stopRecordingMobileHandler} disabled={loading || recording === null} />
         </View>
       )}
-      <Button title={showHistory ? "대화 내역 숨기기" : "대화 내역 보기"} onPress={toggleHistory} />
+      <Button title={showHistory ? "hide text" : "show text"} onPress={toggleHistory} />
       {showHistory && (
         <ScrollView style={styles.historyContainer}>
           {conversationHistory.map((msg, index) => (

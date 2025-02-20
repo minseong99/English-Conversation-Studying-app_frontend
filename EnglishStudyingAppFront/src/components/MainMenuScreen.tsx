@@ -8,14 +8,14 @@ const MainMenuScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>채팅 방식 선택</Text>
+      <Text style={styles.title}>Select the way u want</Text>
       <Button
-        title="음성 채팅"
+        title="Voice chat"
         onPress={() => navigation.navigate('SpeakerSelection')}
       />
       <View style={styles.spacer} />
       <Button
-        title="텍스트 채팅"
+        title="Text chat"
         onPress={() => navigation.navigate('ChatText')}
       />
     </View>

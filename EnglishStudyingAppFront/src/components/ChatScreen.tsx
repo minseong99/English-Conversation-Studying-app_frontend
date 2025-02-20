@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 interface Message {
   id: number;
@@ -12,10 +13,21 @@ interface Message {
 const ChatScreen = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [strategy, setStrategy] = useState<'default' | 'casual'>('default');
+  const navigation = useNavigation();
 
   // 고정 sessionId. 실제 앱에서는 동적으로 관리하세요.
   const sessionId = 'session123';
+  const myIp = '192.168.124.100';
+
+  // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
+  useEffect(() => {
+      const unsubscribe = navigation.addListener('beforeRemove', () => {
+        axios.delete(`http://${myIp}:3000/api/session/${sessionId}`)
+          .then(() => console.log("Session cleared"))
+          .catch((err) => console.error("Session clear error:", err));
+      });
+      return unsubscribe;
+    }, [navigation, sessionId]);
 
   // 백엔드에서 해당 세션의 전체 대화 내역을 불러오는 함수
   const loadSessionHistory = async () => {
@@ -44,8 +56,9 @@ const ChatScreen = () => {
     try {
       const response = await axios.post('http://localhost:3000/api/chat', {
         message: input,
-        strategy,      // 발음 전략
         sessionId,     // 세션 ID
+      },  {
+        headers: { 'Content-Type': 'application/json' },
       });
       // 백엔드가 반환한 발음 처리된 텍스트를 사용하여 AI 메시지 생성
       const botMessage: Message = {
@@ -81,13 +94,9 @@ const ChatScreen = () => {
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="메시지 입력"
+          placeholder="message"
         />
         <Button title="Send" onPress={sendMessage} />
-      </View>
-      <View style={styles.strategyContainer}>
-        <Button title="Default" onPress={() => setStrategy('default')} />
-        <Button title="Casual" onPress={() => setStrategy('casual')} />
       </View>
     </View>
   );
