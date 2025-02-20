@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import { useSession } from '../context/SessionContext';
+import Constants from 'expo-constants';
 
 interface Message {
   id: number;
@@ -15,9 +17,9 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const navigation = useNavigation();
 
-  // 고정 sessionId. 실제 앱에서는 동적으로 관리하세요.
-  const sessionId = 'session123';
-  const myIp = '192.168.124.100';
+  
+  const { sessionId } = useSession(); // sessionId 가져오기
+  const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
 
   // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
   useEffect(() => {

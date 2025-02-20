@@ -5,7 +5,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
+import Constants from 'expo-constants';
 import { Buffer } from 'buffer';
+import { useSession } from '../context/SessionContext';
 if (!global.Buffer) global.Buffer = Buffer;
 
 function base64ToBlob(base64: string, mime: string): Blob {
@@ -35,8 +37,9 @@ const ChatVoiceScreen = () => {
   const [showHistory, setShowHistory] = useState(true);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  const myIp = '192.168.124.100';
-  const sessionId = 'session123';
+  const { sessionId } = useSession(); // sessionId 가져오기
+  const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  
   const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
