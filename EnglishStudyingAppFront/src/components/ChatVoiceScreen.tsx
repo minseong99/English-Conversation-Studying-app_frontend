@@ -1,6 +1,7 @@
 // src/components/ChatVoiceScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
@@ -18,6 +19,10 @@ function base64ToBlob(base64: string, mime: string): Blob {
 }
 
 const ChatVoiceScreen = () => {
+
+  const route = useRoute();
+  const { speaker } = route.params as { speaker: string }; // 선택한 화자 정보
+
   // 녹음 관련 상태
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -64,7 +69,7 @@ const ChatVoiceScreen = () => {
       // 3. TTS: AI 응답 텍스트를 음성으로 변환
       const ttsResponse = await axios.post(
         'http://192.168.124.100:3000/api/speech/tts',
-        { text: aiText },
+        { text: aiText, speaker},
         { headers: { 'Content-Type': 'application/json' }}
       );
       const audioBase64 = ttsResponse.data.audio;
