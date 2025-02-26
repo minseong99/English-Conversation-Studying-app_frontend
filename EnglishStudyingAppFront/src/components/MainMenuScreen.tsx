@@ -18,6 +18,11 @@ const MainMenuScreen = () => {
         title="Text chat"
         onPress={() => navigation.navigate('ChatText')}
       />
+      <View style={styles.spacer} />
+      <Button
+        title="Word Chain"
+        onPress={() => navigation.navigate('WordChain')}
+      />
     </View>
   );
 };
