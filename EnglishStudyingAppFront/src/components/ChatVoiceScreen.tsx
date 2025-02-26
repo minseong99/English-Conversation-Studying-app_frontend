@@ -272,7 +272,7 @@ const ChatVoiceScreen = () => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>음성 대화하기</Text>
+        <Text style={styles.title}>Voice Chat</Text>
         {Platform.OS === 'web' ? (
           <View style={styles.buttonContainer}>
             <Button title="web voice start" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
@@ -298,7 +298,7 @@ const ChatVoiceScreen = () => {
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingText}>{loadingMessage || "모델 로딩 중입니다. 잠시만 기다려주세요..."}</Text>
+          <Text style={styles.loadingText}>{loadingMessage || "Wait for loading model"}</Text>
         </View>
       )}
     </View>
