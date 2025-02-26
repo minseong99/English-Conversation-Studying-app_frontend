@@ -234,8 +234,8 @@ const handleSubmit = async () => {
       {loading && <ActivityIndicator size="large" />}
       {currentWordData && (
         <>
-          <Text style={styles.wordText}>AI Word: {currentWordData.word}</Text>
-          <Button title="Play AI Word Audio" onPress={() => playTTS(currentWordData.word, 'ai')} />
+          <Text style={styles.wordText}>{currentWordData.word}</Text>
+          <Button title="Play Word Audio" onPress={() => playTTS(currentWordData.word, 'ai')} />
         </>
       )}
       <TextInput
