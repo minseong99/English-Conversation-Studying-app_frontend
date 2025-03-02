@@ -1,3 +1,4 @@
+// src/context/SessionContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Context 생성
