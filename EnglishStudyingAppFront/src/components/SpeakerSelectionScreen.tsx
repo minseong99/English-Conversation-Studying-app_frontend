@@ -1,45 +1,101 @@
-// src/screens/SpeakerSelectionScreen.tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const speakers = [
-  { id: "p225", label: "model 1 (p225)" },
-  { id: "p226", label: "model 2 (p226)" },
-  { id: "p227", label: "model 3 (p227)" },
-  { id: "p228", label: "model 4 (p228)" },
-  { id: "p229", label: "model 5 (p229)" },
-  { id: "p230", label: "model 6 (p230)" },
-  { id: "p231", label: "model 7 (p231)" },
-  { id: "p232", label: "model 8 (p232)" },
-  { id: "p233", label: "model 9 (p233)" },
-  { id: "p234", label: "model 10 (p234)" },
+const models = [
+  { id: '1', name: 'ai 모델 이름 1', description: '(p225)' },
+  { id: '2', name: 'ai 모델 이름 2', description: '(p226)' },
+  { id: '3', name: 'ai 모델 이름 3', description: '(p227)' },
+  { id: '4', name: 'ai 모델 이름 4', description: '(p228)' },
+  { id: '5', name: 'ai 모델 이름 5', description: '(p229)' },
+  { id: '6', name: 'ai 모델 이름 6', description: '(p230)' },
+  { id: '7', name: 'ai 모델 이름 7', description: '(p231)' },
+  { id: '8', name: 'ai 모델 이름 8', description: '(p232)' },
+  { id: '9', name: 'ai 모델 이름 9', description: '(p233)' },
+  { id: '10', name: 'ai 모델 이름 10', description: '(p234)' },
 ];
 
 const SpeakerSelectionScreen = () => {
   const navigation = useNavigation();
 
-  const handleSpeakerSelect = (speakerId: string) => {
+  const handleSpeakerSelect = (speakerId, speakerName) => {
     // 선택된 화자 정보를 파라미터로 ChatVoiceScreen으로 이동
-    navigation.navigate('ChatVoice', { speaker: speakerId });
+    navigation.navigate('ChatVoice', { speakerId, speakerName });
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Select the model u use</Text>
-      {speakers.map((spk) => (
-        <View key={spk.id} style={styles.buttonContainer}>
-          <Button title={spk.label} onPress={() => handleSpeakerSelect(spk.id)} />
-        </View>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.title}>AI 선택 화면</Text>
+      </View>
+      <FlatList
+        data={models}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity 
+            style={styles.modelCard} 
+            onPress={() => handleSpeakerSelect(item.id, item.name)}
+          >
+            <Text style={styles.modelName}>{item.name}</Text>
+            <Text style={styles.modelDescription}>{item.description}</Text>
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={styles.listContainer}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
-  title: { fontSize: 24, marginBottom: 20 },
-  buttonContainer: { marginVertical: 10, width: '80%' },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  backButton: {
+    right: 15,
+    padding: 10, 
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: 20,
+    left: 50,
+  },
+  listContainer: {
+    paddingHorizontal: 16,
+  },
+  modelCard: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    marginVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  modelName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modelDescription: {
+    fontSize: 14,
+    color: 'gray',
+  },
 });
 
 export default SpeakerSelectionScreen;

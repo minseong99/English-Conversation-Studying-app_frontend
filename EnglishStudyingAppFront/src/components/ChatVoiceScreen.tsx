@@ -1,6 +1,6 @@
 // src/components/ChatVoiceScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { View, Text, Button, StyleSheet, ActivityIndicator, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
@@ -38,7 +38,7 @@ const ChatVoiceScreen = () => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const { sessionId } = useSession(); // sessionId 가져오기
-  const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  const myIp = Constants.manifest?.extra?.myIp || '192.168.219.103';
   
   const navigation = useNavigation();
   useEffect(() => {
@@ -272,10 +272,22 @@ const ChatVoiceScreen = () => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>음성 대화하기</Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>Voice</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.backButton}>←</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.iconContainer}>
+          <Text style={styles.icon}>🔊</Text>
+        </View>
+        
         {Platform.OS === 'web' ? (
           <View style={styles.buttonContainer}>
-            <Button title="web voice start" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
+            <TouchableOpacity onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null}>
+              <Text style={styles.micIcon}>🎤</Text>
+            </TouchableOpacity>
             <Button title="stop" onPress={stopRecordingWebHandler} disabled={loading || mediaRecorder === null} />
           </View>
         ) : (
@@ -284,7 +296,14 @@ const ChatVoiceScreen = () => {
             <Button title="stop" onPress={stopRecordingMobileHandler} disabled={loading || recording === null} />
           </View>
         )}
-        <Button title={showHistory ? "hide text" : "show text"} onPress={toggleHistory} />
+        
+        <View style={styles.chatContainer}>
+          <Text style={styles.chatLabel}>채팅 내용</Text>
+          <TouchableOpacity onPress={toggleHistory} style={styles.chatButton}>
+            <Text style={styles.chatButtonText}>{showHistory ? 'Hide' : 'Show'}</Text>
+          </TouchableOpacity>
+        </View>
+        
         {showHistory && (
           <ScrollView style={styles.historyContainer}>
             {conversationHistory.map((msg, index) => (
@@ -298,7 +317,7 @@ const ChatVoiceScreen = () => {
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingText}>{loadingMessage || "모델 로딩 중입니다. 잠시만 기다려주세요..."}</Text>
+          <Text style={styles.loadingText}>{loadingMessage || "Wait for loading model"}</Text>
         </View>
       )}
     </View>
@@ -306,13 +325,70 @@ const ChatVoiceScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, alignItems: 'center', padding: 16, justifyContent: 'center' },
-  title: { fontSize: 20, marginBottom: 20 },
-  buttonContainer: { marginVertical: 20 },
-  label: { marginTop: 20, fontWeight: 'bold' },
-  text: { marginVertical: 10, fontSize: 16, textAlign: 'center' },
-  historyContainer: { marginTop: 20, width: '100%', maxHeight: 200, borderWidth: 1, padding: 10 },
-  historyText: { fontSize: 14, marginVertical: 2 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+  },
+  backButton: {
+    fontSize: 24,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    marginTop: 60,
+  },
+  icon: {
+    fontSize: 50,
+    color: '#636AE8',
+  },
+  micButton: {
+    position: 'absolute',
+    bottom: '30%',
+    alignSelf: 'center',
+  },
+  mic: {
+    fontSize: 50,
+    color: '#A0A0A0',
+  },
+  micIcon: {
+    fontSize: 40,
+    color: '#000000',
+  },
+  chatContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 80,
+  },
+  chatLabel: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  chatButton: {
+    backgroundColor: '#636AE8',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  chatButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  historyContainer: {
+    position: 'absolute',
+    bottom: 140,
+    width: '90%',
+    maxHeight: 200,
+    borderWidth: 1,
+    padding: 10,
+  },
+  historyText: {
+    fontSize: 14,
+    marginVertical: 2,
+  },
   loadingOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
