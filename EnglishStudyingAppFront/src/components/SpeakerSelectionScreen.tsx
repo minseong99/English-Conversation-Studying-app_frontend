@@ -20,7 +20,6 @@ const SpeakerSelectionScreen = () => {
   const navigation = useNavigation();
 
   const handleSpeakerSelect = (speakerId, speakerName) => {
-    // 선택된 화자 정보를 파라미터로 ChatVoiceScreen으로 이동
     navigation.navigate('ChatVoice', { speakerId, speakerName });
   };
 
