@@ -156,24 +156,43 @@ const ChatVoiceScreen = () => {
       const audioBase64 = ttsResponse.data.audio;
 
       // 음성 재생 (웹/모바일 분기)
-      setIsSpeaking(true);
+      
       if (Platform.OS === 'web') {
         const audioBlob = base64ToBlob(audioBase64, 'audio/wav');
         const audioUrl = URL.createObjectURL(audioBlob);
         const audioElem = new window.Audio(audioUrl);
+
+        // 재생 시작 시 스피커 활성화
+        audioElem.onplay = () => {
+          setIsSpeaking(true);
+        };
+
         audioElem.play().then(() => {
           audioElem.onended = () => {
+            setIsSpeaking(false);
             URL.revokeObjectURL(audioUrl);
             console.log('Audio playback ended and URL revoked.');
           };
         }).catch(error => {
           console.error("Auto audio play error:", error);
+          setIsSpeaking(false);
         });
       } else {
         const audioUri = FileSystem.cacheDirectory + 'ttsAudio.wav';
         await FileSystem.writeAsStringAsync(audioUri, audioBase64, { encoding: FileSystem.EncodingType.Base64 });
         const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
         setSound(sound);
+
+        // 재생 시작 시 스피커 활성화
+        setIsSpeaking(true);
+
+        // onPlaybackStatusUpdate 리스너 추가
+        sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+            // 재생 종료 시 스피커 비활성화
+            setIsSpeaking(false);
+          }
+        });
         await sound.playAsync();
       }
      
@@ -275,7 +294,7 @@ const ChatVoiceScreen = () => {
     } finally {
       setLoading(false);
       setMediaRecorder(null);
-      setIsSpeaking(false);
+      
     }
   };
 
@@ -306,6 +325,15 @@ const ChatVoiceScreen = () => {
   useEffect(() => {
     setIsRecording(isSpeaking);
   }, [isSpeaking]);
+
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 sound 객체 정리
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
 
   return (
     <SafeAreaView style={styles.container}>
