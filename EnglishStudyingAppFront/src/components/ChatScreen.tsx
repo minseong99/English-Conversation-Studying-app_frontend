@@ -1,24 +1,24 @@
 // src/components/ChatScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, FlatList, Text, StyleSheet } from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useSession } from '../context/SessionContext';
 import Constants from 'expo-constants';
 
-interface Message {
+type Message = {
   id: number;
   text: string;
   sender: 'user' | 'bot';
-}
+};
 
 const ChatScreen = () => {
-  const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
   const navigation = useNavigation();
+  const { sessionId } = useSession();
 
-  
-  const { sessionId } = useSession(); // sessionId 가져오기
   const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
 
   // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
@@ -47,32 +47,34 @@ const ChatScreen = () => {
     }
   };
 
-  // 메시지 전송 함수: 사용자 메시지와 AI 응답을 모두 로컬 상태에 추가
   const sendMessage = async () => {
-    if (!input) return;
+    if (!input.trim()) return;
 
-    // 사용자가 입력한 메시지를 즉시 추가
-    const userMessage: Message = { id: Date.now(), text: input, sender: 'user' };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: Message = { 
+      id: Date.now(), 
+      text: input, 
+      sender: 'user' 
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
 
     try {
       const response = await axios.post('http://localhost:3000/api/chat', {
         message: input,
-        sessionId,     // 세션 ID
-      },  {
+        sessionId,
+      }, {
         headers: { 'Content-Type': 'application/json' },
       });
-      // 백엔드가 반환한 발음 처리된 텍스트를 사용하여 AI 메시지 생성
+
       const botMessage: Message = {
         id: Date.now() + 1,
         text: response.data.pronouncedText,
         sender: 'bot',
       };
-      setMessages((prev) => [...prev, botMessage]);
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('메시지 전송 에러:', error);
     }
-    setInput('');
   };
 
   // 컴포넌트 마운트 시, 기존 세션 내역을 불러옵니다.
@@ -81,36 +83,177 @@ const ChatScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <Text style={item.sender === 'user' ? styles.userMessage : styles.botMessage}>
-            {item.text}
-          </Text>
-        )}
-      />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Chat</Text>
+      </View>
+
+      <ScrollView style={styles.messageContainer}>
+        {messages.map((message) => (
+          <View
+            key={message.id}
+            style={[
+              styles.messageWrapper,
+              message.sender === 'user' ? styles.userMessageWrapper : styles.botMessageWrapper
+            ]}
+          >
+            <View
+              style={[
+                styles.messageBox,
+                message.sender === 'user' ? styles.userMessage : styles.botMessage
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  message.sender === 'user' ? styles.userMessageText : styles.botMessageText
+                ]}
+              >
+                {message.text}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="message"
+          placeholder="메시지를 입력하세요"
+          placeholderTextColor="#999"
         />
-        <Button title="Send" onPress={sendMessage} />
+        <TouchableOpacity 
+          style={styles.sendButton} 
+          onPress={sendMessage}
+        >
+          <Text style={styles.sendButtonText}>SEND</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+
+      <View style={styles.bottomTab}>
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('MainMenu')}
+        >
+          <Icon name="home" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Home</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('SpeakerSelection')}
+        >
+          <Icon name="mic" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Voice</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.tabButton}
+        >
+          <Icon name="chatbubble" size={24} color="#6B77F8" />
+          <Text style={styles.tabText}>Chat</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  inputContainer: { flexDirection: 'row', alignItems: 'center' },
-  input: { flex: 1, borderWidth: 1, marginRight: 8, padding: 8 },
-  userMessage: { textAlign: 'right', marginVertical: 4, color: 'blue' },
-  botMessage: { textAlign: 'left', marginVertical: 4, color: 'green' },
-  strategyContainer: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  messageContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  messageWrapper: {
+    width: '100%',
+    marginVertical: 5,
+  },
+  userMessageWrapper: {
+    alignItems: 'flex-end',
+  },
+  botMessageWrapper: {
+    alignItems: 'flex-start',
+  },
+  messageBox: {
+    maxWidth: '80%',
+    padding: 15,
+    borderRadius: 20,
+  },
+  userMessage: {
+    backgroundColor: '#6B77F8',
+    borderBottomRightRadius: 5,
+  },
+  botMessage: {
+    backgroundColor: '#F0F0F0',
+    borderBottomLeftRadius: 5,
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  userMessageText: {
+    color: '#FFFFFF',
+  },
+  botMessageText: {
+    color: '#000000',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    marginRight: 10,
+    fontSize: 16,
+  },
+  sendButton: {
+    backgroundColor: '#6B77F8',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+  },
+  sendButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  bottomTab: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    paddingVertical: 10,
+  },
+  tabButton: {
+    alignItems: 'center',
+  },
+  tabText: {
+    color: '#6B77F8',
+    marginTop: 5,
+    fontSize: 12,
+  },
+  tabTextInactive: {
+    color: '#9EA0A5',
+    marginTop: 5,
+    fontSize: 12,
+  },
 });
 
 export default ChatScreen;

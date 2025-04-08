@@ -1,45 +1,166 @@
 // src/screens/SpeakerSelectionScreen.tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+// 타입 정의 추가
+type NavigationProp = {
+  navigate: (screen: string, params?: any) => void;
+};
 
 const speakers = [
-  { id: "p225", label: "model 1 (p225)" },
-  { id: "p226", label: "model 2 (p226)" },
-  { id: "p227", label: "model 3 (p227)" },
-  { id: "p228", label: "model 4 (p228)" },
-  { id: "p229", label: "model 5 (p229)" },
-  { id: "p230", label: "model 6 (p230)" },
-  { id: "p231", label: "model 7 (p231)" },
-  { id: "p232", label: "model 8 (p232)" },
-  { id: "p233", label: "model 9 (p233)" },
-  { id: "p234", label: "model 10 (p234)" },
+  { 
+    id: "p225", 
+    label: "ai 모델 이름", 
+    description: "모델 설명",
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+  },
+  { 
+    id: "p226", 
+    label: "ai 모델 이름", 
+    description: "모델 설명",
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+  },
+  { id: "p227", label: "ai 모델 이름" , 
+    description: "모델 설명",
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+  },
+  { id: "p228", label: "ai 모델 이름", 
+    description: "모델 설명",
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+  },
+  { id: "p229", label: "ai 모델 이름", 
+    description: "모델 설명",
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+  },
 ];
 
 const SpeakerSelectionScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
   const handleSpeakerSelect = (speakerId: string) => {
-    // 선택된 화자 정보를 파라미터로 ChatVoiceScreen으로 이동
     navigation.navigate('ChatVoice', { speaker: speakerId });
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Select the model u use</Text>
-      {speakers.map((spk) => (
-        <View key={spk.id} style={styles.buttonContainer}>
-          <Button title={spk.label} onPress={() => handleSpeakerSelect(spk.id)} />
-        </View>
-      ))}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>AI 선택 화면</Text>
+      </View>
+
+      <ScrollView style={styles.scrollView}>
+        {speakers.map((spk) => (
+          <TouchableOpacity 
+            key={spk.id} 
+            style={styles.modelContainer}
+            onPress={() => handleSpeakerSelect(spk.id)}
+          >
+            <View style={styles.modelContent}>
+              <Text style={styles.modelName}>{spk.label}</Text>
+              <Text style={styles.modelDesc}>모델 설명</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <View style={styles.bottomTab}>
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('MainMenu')}
+        >
+          <Icon name="home" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Home</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('SpeakerSelection')}
+        >
+          <Icon name="mic" size={24} color="#6B77F8" />
+          <Text style={styles.tabText}>Voice</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('ChatText')}
+        >
+          <Icon name="chatbubble" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Chat</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
-  title: { fontSize: 24, marginBottom: 20 },
-  buttonContainer: { marginVertical: 10, width: '80%' },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  scrollView: {
+    flex: 1,
+    padding: 20,
+  },
+  modelContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    marginBottom: 15,
+    padding: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+  },
+  modelContent: {
+    flex: 1,
+  },
+  modelName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+    color: '#000000',
+  },
+  modelDesc: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  bottomTab: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    paddingVertical: 10,
+  },
+  tabButton: {
+    alignItems: 'center',
+  },
+  tabText: {
+    color: '#6B77F8',
+    marginTop: 5,
+    fontSize: 12,
+  },
+  tabTextInactive: {
+    color: '#9EA0A5',
+    marginTop: 5,
+    fontSize: 12,
+  },
 });
 
 export default SpeakerSelectionScreen;
