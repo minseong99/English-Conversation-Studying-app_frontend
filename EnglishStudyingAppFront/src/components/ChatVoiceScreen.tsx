@@ -1,6 +1,6 @@
 // src/components/ChatVoiceScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, Platform, ScrollView } from 'react-native';
+import { View, Text, Button, StyleSheet, ActivityIndicator, Platform, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
@@ -8,6 +8,7 @@ import { Audio } from 'expo-av';
 import Constants from 'expo-constants';
 import { Buffer } from 'buffer';
 import { useSession } from '../context/SessionContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 if (!global.Buffer) global.Buffer = Buffer;
 
 function base64ToBlob(base64: string, mime: string): Blob {
@@ -41,6 +42,12 @@ const ChatVoiceScreen = () => {
   const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
   
   const navigation = useNavigation();
+  const [isRecording, setIsRecording] = useState(false);
+  const [showText, setShowText] = useState(false);
+
+  // 스피커 버튼 상태
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       axios.delete(`http://${myIp}:3000/api/session/${sessionId}`)
@@ -269,50 +276,237 @@ const ChatVoiceScreen = () => {
     }
   };
 
+  // 스피커 버튼 클릭 핸들러
+  const handleSpeakerPress = async () => {
+    if (isRecording) return; // 이미 녹음 중이면 무시
+    
+    // 녹음 시작
+    setIsRecording(true);
+    if (Platform.OS === 'web') {
+      await startRecordingWeb();
+    } else {
+      await startRecordingMobile();
+    }
+  };
+
+  // 마이크 버튼 클릭 핸들러 (Stop 기능)
+  const handleMicPress = async () => {
+    if (!isRecording) return; // 녹음 중이 아니면 무시
+    
+    // 녹음 중지
+    setIsRecording(false);
+    if (Platform.OS === 'web') {
+      await stopRecordingWebHandler();
+    } else {
+      await stopRecordingMobileHandler();
+    }
+  };
+
+  // 마이크 상태는 스피커 상태에 따라 자동으로 변경
+  useEffect(() => {
+    setIsRecording(isSpeaking);
+  }, [isSpeaking]);
+
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Voice Chat</Text>
-        {Platform.OS === 'web' ? (
-          <View style={styles.buttonContainer}>
-            <Button title="web voice start" onPress={startRecordingWeb} disabled={loading || mediaRecorder !== null} />
-            <Button title="stop" onPress={stopRecordingWebHandler} disabled={loading || mediaRecorder === null} />
-          </View>
-        ) : (
-          <View style={styles.buttonContainer}>
-            <Button title="mobile voice start" onPress={startRecordingMobile} disabled={loading || recording !== null} />
-            <Button title="stop" onPress={stopRecordingMobileHandler} disabled={loading || recording === null} />
-          </View>
-        )}
-        <Button title={showHistory ? "hide text" : "show text"} onPress={toggleHistory} />
-        {showHistory && (
-          <ScrollView style={styles.historyContainer}>
-            {conversationHistory.map((msg, index) => (
-              <Text key={index} style={styles.historyText}>
-                {msg.sender}: {msg.text}
+    <SafeAreaView style={styles.container}>
+  
+
+      <View style={styles.content}>
+        <View style={styles.speakerContainer}>
+          <TouchableOpacity 
+            style={styles.speakerButton}
+            onPress={handleSpeakerPress}
+          >
+            <Icon 
+              name="volume-high" 
+              size={120} 
+              color={isRecording ? "#6B77F8" : "#9EA0A5"}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.microphoneContainer}>
+          <TouchableOpacity 
+            style={styles.micButton}
+            onPress={handleMicPress}
+          >
+            <Icon 
+              name={isRecording ? "mic" : "mic-off"} 
+              size={80} 
+              color={isRecording ? "#6B77F8" : "#666666"}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.chatSection}>
+          <View style={styles.chatHeader}>
+            
+            <TouchableOpacity 
+              style={[styles.showButton, showText && styles.hideButton]}
+              onPress={() => setShowText(!showText)}
+            >
+              <Text style={styles.showButtonText}>
+                {showText ? 'Hide' : 'Show'}
               </Text>
-            ))}
-          </ScrollView>
-        )}
-      </ScrollView>
+            </TouchableOpacity>
+          </View>
+
+          {showText && (
+            <ScrollView style={styles.chatContainer}>
+              {conversationHistory.map((msg, index) => (
+                <Text key={index} style={styles.chatText}>
+                  {msg.sender}: {msg.text}
+                </Text>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.bottomTab}>
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('MainMenu')}
+        >
+          <Icon name="home" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Home</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('SpeakerSelection')}
+        >
+          <Icon name="mic" size={24} color="#6B77F8" />
+          <Text style={styles.tabText}>Voice</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('ChatText')}
+        >
+          <Icon name="chatbubble" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Chat</Text>
+        </TouchableOpacity>
+      </View>
+
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#fff" />
           <Text style={styles.loadingText}>{loadingMessage || "Wait for loading model"}</Text>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, alignItems: 'center', padding: 16, justifyContent: 'center' },
-  title: { fontSize: 20, marginBottom: 20 },
-  buttonContainer: { marginVertical: 20 },
-  label: { marginTop: 20, fontWeight: 'bold' },
-  text: { marginVertical: 10, fontSize: 16, textAlign: 'center' },
-  historyContainer: { marginTop: 20, width: '100%', maxHeight: 200, borderWidth: 1, padding: 10 },
-  historyText: { fontSize: 14, marginVertical: 2 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+  },
+  speakerContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  speakerButton: {
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
+    backgroundColor: '#F5F5F5',
+  },
+  microphoneContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  micButton: {
+    width: 150,
+    height: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 75,
+    backgroundColor: '#F5F5F5',
+  },
+  chatSection: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  chatLabel: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  showButton: {
+    backgroundColor: '#6B77F8',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  hideButton: {
+    backgroundColor: '#4CAF50', // Hide 상태일 때 초록색으로 변경
+  },
+  showButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  chatContainer: {
+    width: '100%',
+    maxHeight: 200,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 15,
+    padding: 15,
+  },
+  chatText: {
+    fontSize: 16,
+    marginVertical: 5,
+    color: '#333333',
+  },
+  bottomTab: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    paddingVertical: 10,
+  },
+  tabButton: {
+    alignItems: 'center',
+  },
+  tabText: {
+    color: '#6B77F8',
+    marginTop: 5,
+    fontSize: 12,
+  },
+  tabTextInactive: {
+    color: '#9EA0A5',
+    marginTop: 5,
+    fontSize: 12,
+  },
   loadingOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
