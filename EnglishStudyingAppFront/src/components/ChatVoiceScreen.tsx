@@ -156,6 +156,7 @@ const ChatVoiceScreen = () => {
       const audioBase64 = ttsResponse.data.audio;
 
       // 음성 재생 (웹/모바일 분기)
+      setIsSpeaking(true);
       if (Platform.OS === 'web') {
         const audioBlob = base64ToBlob(audioBase64, 'audio/wav');
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -175,6 +176,7 @@ const ChatVoiceScreen = () => {
         setSound(sound);
         await sound.playAsync();
       }
+     
     } catch (error) {
       console.error('processAudioWithHistory 에러:', error);
     }
@@ -273,36 +275,34 @@ const ChatVoiceScreen = () => {
     } finally {
       setLoading(false);
       setMediaRecorder(null);
+      setIsSpeaking(false);
     }
   };
 
-  // 스피커 버튼 클릭 핸들러
-  const handleSpeakerPress = async () => {
-    if (isRecording) return; // 이미 녹음 중이면 무시
-    
-    // 녹음 시작
-    setIsRecording(true);
-    if (Platform.OS === 'web') {
-      await startRecordingWeb();
-    } else {
-      await startRecordingMobile();
-    }
-  };
 
-  // 마이크 버튼 클릭 핸들러 (Stop 기능)
+  // 마이크 버튼 클릭 핸들러 
   const handleMicPress = async () => {
-    if (!isRecording) return; // 녹음 중이 아니면 무시
     
-    // 녹음 중지
-    setIsRecording(false);
-    if (Platform.OS === 'web') {
-      await stopRecordingWebHandler();
-    } else {
-      await stopRecordingMobileHandler();
+    if(isRecording){ // 녹음중이면 
+       // 녹음 중지
+       setIsRecording(false);
+       if (Platform.OS === 'web') {
+        await stopRecordingWebHandler();
+      } else {
+        await stopRecordingMobileHandler();
+      }
+    }else { // 녹음중이 아니면
+      // 녹음 시작
+      setIsRecording(true);
+      if (Platform.OS === 'web') {
+        await startRecordingWeb();
+      } else {
+        await startRecordingMobile();
+      }
     }
   };
 
-  // 마이크 상태는 스피커 상태에 따라 자동으로 변경
+  
   useEffect(() => {
     setIsRecording(isSpeaking);
   }, [isSpeaking]);
@@ -313,16 +313,14 @@ const ChatVoiceScreen = () => {
 
       <View style={styles.content}>
         <View style={styles.speakerContainer}>
-          <TouchableOpacity 
-            style={styles.speakerButton}
-            onPress={handleSpeakerPress}
-          >
+          <View 
+            style={styles.speakerButton}>
             <Icon 
               name="volume-high" 
               size={120} 
-              color={isRecording ? "#6B77F8" : "#9EA0A5"}
+              color={isSpeaking ? "#6B77F8" : "#9EA0A5"}
             />
-          </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.microphoneContainer}>
