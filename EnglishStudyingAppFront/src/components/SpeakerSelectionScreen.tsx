@@ -1,10 +1,20 @@
 // src/screens/SpeakerSelectionScreen.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView,Image } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  Image,
+  useWindowDimensions,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import PersonalityMeter from '../components/PersonalityMeter';
 
-// 타입 정의 추가
+
 type NavigationProp = {
   navigate: (screen: string, params?: any) => void;
 };
@@ -17,6 +27,15 @@ const speakers = [
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/alice.png'),
+    traits: [
+      { emoji: '🔥', label: 'lively', value: 30 },
+      { emoji: '🧠', label: 'logical', value: 60 },
+      { emoji: '💖', label: 'kindness', value: 40 },
+      { emoji: '🧐', label: 'seriousness', value: 85 },
+      { emoji: '✨', label: 'creativity', value: 50 }
+    ],
+    color: '#FF6B6B',
+    mood: '😐'
   },
   { 
     id: "p226", 
@@ -25,65 +44,162 @@ const speakers = [
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/tomas.png'),
+    traits: [
+      { emoji: '🔥', label: 'lively', value: 90 },
+      { emoji: '🧠', label: 'logical', value: 50 },
+      { emoji: '💖', label: 'kindness', value: 75 },
+      { emoji: '🧐', label: 'seriousness', value: 25 },
+      { emoji: '✨', label: 'creativity', value: 85 }
+    ],
+    color: '#4ECDC4',
+    mood: '😄'
   },
-  { id: "p228", label: "Robert" , 
+  { 
+    id: "p228", 
+    label: "Robert", 
     description: "He speaks in a gentlemanly and logical manner.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/robert.png'),
+    traits: [
+      { emoji: '🔥', label: 'lively', value: 60 },
+      { emoji: '🧠', label: 'logical', value: 90 },
+      { emoji: '💖', label: 'kindness', value: 80 },
+      { emoji: '🧐', label: 'seriousness', value: 75 },
+      { emoji: '✨', label: 'creativity', value: 50 }
+    ],
+    color: '#FFD166',
+    mood: '🤔'
   },
-  { id: "p229", label: "Tom", 
+  { 
+    id: "p229", 
+    label: "Tom", 
     description: "He has an easygoing personality and is a bit lazy.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/tom.png'),
+    traits: [
+      { emoji: '🔥', label: 'lively', value: 50 },
+      { emoji: '🧠', label: 'logical', value: 30 },
+      { emoji: '💖', label: 'kindness', value: 75 },
+      { emoji: '🧐', label: 'seriousness', value: 20 },
+      { emoji: '✨', label: 'creativity', value: 60 }
+    ],
+    color: '#6B77F8',
+    mood: '😌'
   },
 ];
 
 const SpeakerSelectionScreen = () => {
   const navigation = useNavigation<NavigationProp>();
+  const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
 
+  // 항상 가로 2개씩 보여주도록 카드 너비 계산
+  const { width } = useWindowDimensions();
+  const cardMargin = 15;
+  const cardWidth = (width - cardMargin * 3) / 2; // 좌우 + 가운데 마진 3개
+
+// 같은 카드를 또 누르면 해제(toggle)
   const handleSpeakerSelect = (speakerId: string) => {
-    navigation.navigate('ChatVoice', { speaker: speakerId });
+      setSelectedSpeaker(prev => (prev === speakerId ? null : speakerId));
+  };
+
+  const handleStartChat = () => {
+    if (selectedSpeaker) {
+      navigation.navigate('ChatVoice', { speaker: selectedSpeaker });
+    }
+  };
+
+  const renderSpeakersGrid = () => (
+    <View style={styles.gridContainer}>
+      {speakers.map(speaker => (
+        <TouchableOpacity
+          key={speaker.id}
+          style={[
+            styles.speakerCard,
+            { width: cardWidth, margin: cardMargin / 2 },
+            selectedSpeaker === speaker.id && styles.selectedCard,
+          ]}
+          onPress={() => handleSpeakerSelect(speaker.id)}
+        >
+          <View style={styles.cardHeader}>
+            <Text style={styles.speakerMood}>{speaker.mood}</Text>
+            <Text style={styles.speakerName}>{speaker.label}</Text>
+          </View>
+          <Image source={speaker.image} style={styles.speakerImage} />
+          <View style={styles.topTraitsContainer}>
+            {speaker.traits.slice(0, 3).map((trait, i) => (
+              <View key={i} style={styles.miniTrait}>
+                <Text style={styles.traitEmoji}>{trait.emoji}</Text>
+                <View style={styles.miniMeterBg}>
+                  <View
+                    style={[
+                      styles.miniMeterFill,
+                      { width: `${trait.value}%`, backgroundColor: speaker.color },
+                    ]}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  const renderSelectedSpeakerDetails = () => {
+    if (!selectedSpeaker) return null;
+    const speaker = speakers.find(s => s.id === selectedSpeaker)!;
+    return (
+      <View style={styles.detailsContainer}>
+        <View style={styles.detailsHeader}>
+          <View>
+            <Text style={styles.detailsName}>
+              {speaker.label} <Text style={styles.detailsMood}>{speaker.mood}</Text>
+            </Text>
+            <Text style={styles.detailsDesc}>{speaker.description}</Text>
+          </View>
+          <Image source={speaker.image} style={styles.detailsImage} />
+        </View>
+        <PersonalityMeter traits={speaker.traits} color={speaker.color} />
+        <TouchableOpacity
+          style={[styles.startButton, { backgroundColor: speaker.color }]}
+          onPress={handleStartChat}
+        >
+          <Text style={styles.startButtonText}>Start a conversation</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-
-      <ScrollView style={styles.scrollView}>
-        {speakers.map((spk) => (
-          <TouchableOpacity 
-            key={spk.id} 
-            style={styles.modelContainer}
-            onPress={() => handleSpeakerSelect(spk.id)}
-          >
-            <View style={styles.modelContent}>
-              <Text style={styles.modelName}>{spk.label}</Text>
-              <Text style={styles.modelDesc}>{spk.description}</Text>
-            </View>
-            <Image source={spk.image} style={styles.silhouetteImage} />
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.mainContent}>
+        <Text style={styles.headerTitle}>Select your friends!</Text>
+        <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 80 }]}>
+          {renderSpeakersGrid()}
+          {renderSelectedSpeakerDetails()}
+        </ScrollView>
+      </View>
 
       <View style={styles.bottomTab}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.tabButton}
           onPress={() => navigation.navigate('MainMenu')}
         >
           <Icon name="home" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Home</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.tabButton}
           onPress={() => navigation.navigate('SpeakerSelection')}
         >
           <Icon name="mic" size={24} color="#6B77F8" />
           <Text style={styles.tabText}>Voice</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.tabButton}
           onPress={() => navigation.navigate('ChatText')}
         >
@@ -96,65 +212,138 @@ const SpeakerSelectionScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  textContent: {
-    flex: 1, // 가능한 많은 공간 차지
-  },
-  silhouetteImage: {
-    width: 60, // 이미지 너비 조정
-    height: 60, // 이미지 높이 조정
-    marginLeft: 10, // 텍스트와 이미지 사이 간격
-  },
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  header: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  scrollView: {
+  mainContent: {
     flex: 1,
-    padding: 20,
   },
-  modelContainer: {
-    backgroundColor: '#FFFFFF',
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 15,
+  },
+  scrollContent: {
+    paddingHorizontal: 15,
+    paddingBottom: 80, // 바텀탭 높이 + 여유
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginHorizontal: -7.5, // 카드 margin 보정
+  },
+  speakerCard: {
+    backgroundColor: '#F8F8F8',
     borderRadius: 15,
-    marginBottom: 15,
-    padding: 20,
+    padding: 15,
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
   },
-  modelContent: {
-    flex: 1,
-    flexDirection: 'row', // 텍스트와 이미지를 가로로 배치
-    justifyContent: 'space-between', // 텍스트와 이미지 사이의 공간 분배
-    alignItems: 'center', // 세로 중앙 정렬
+  selectedCard: {
+    borderWidth: 2,
+    borderColor: '#6B77F8',
   },
-  modelName: {
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  speakerMood: {
+    fontSize: 20,
+    marginRight: 5,
+  },
+  speakerName: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
-    color: '#000000',
   },
-  modelDesc: {
+  speakerImage: {
+    width: 50,
+    height: 50,
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  topTraitsContainer: {
+    marginTop: 5,
+  },
+  miniTrait: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  traitEmoji: {
+    fontSize: 12,
+    marginRight: 5,
+    width: 15,
+  },
+  miniMeterBg: {
+    flex: 1,
+    height: 5,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  miniMeterFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  detailsContainer: {
+    marginTop: 20,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 15,
+    padding: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  detailsName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  detailsMood: {
+    fontSize: 20,
+  },
+  detailsDesc: {
     fontSize: 14,
-    color: '#666666',
+    color: '#666',
+    marginTop: 5,
+  },
+  detailsImage: {
+    width: 60,
+    height: 60,
+  },
+  startButton: {
+    marginTop: 15,
+    borderRadius: 30,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  startButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    height: 60,
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
-    paddingVertical: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
   },
   tabButton: {
     alignItems: 'center',
@@ -172,3 +361,4 @@ const styles = StyleSheet.create({
 });
 
 export default SpeakerSelectionScreen;
+
