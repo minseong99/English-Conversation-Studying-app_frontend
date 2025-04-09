@@ -1,5 +1,5 @@
 // src/screens/SpeakerSelectionScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,45 @@ import {
   SafeAreaView,
   Image,
   useWindowDimensions,
+  Animated,
+  Pressable,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PersonalityMeter from '../components/PersonalityMeter';
 
-
 type NavigationProp = {
   navigate: (screen: string, params?: any) => void;
 };
 
-const speakers = [
+// 스피커 타입 정의
+type SpeakerTrait = {
+  emoji: string;
+  label: string;
+  value: number;
+};
+
+type Speaker = {
+  id: string;
+  label: string;
+  description: string;
+  backgroundColor: string;
+  borderRadius: number;
+  image: any;
+  traits: SpeakerTrait[];
+  color: string;
+  mood: string;
+};
+
+// AnimatedCard의 Props 타입 정의
+type AnimatedCardProps = {
+  speaker: Speaker;
+  isSelected: boolean;
+  onPress: () => void;
+  cardWidth: number;
+};
+
+const speakers: Speaker[] = [
   { 
     id: "p225", 
     label: "Alice", 
@@ -90,6 +118,92 @@ const speakers = [
   },
 ];
 
+// 애니메이션을 위한 카드 컴포넌트
+const AnimatedCard = ({ speaker, isSelected, onPress, cardWidth }: AnimatedCardProps) => {
+  const animatedValue = useRef(new Animated.Value(0)).current;
+  
+  const animatedStyle = {
+    transform: [
+      { scale: animatedValue.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.05] // 5% 크기 증가
+        }) 
+      },
+      { translateY: animatedValue.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -5] // 위로 5픽셀 이동
+        })
+      }
+    ],
+    shadowOpacity: animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.1, 0.3] // 그림자 더 진하게
+    }),
+    shadowRadius: animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [3.84, 8]
+    })
+  };
+
+  const handlePressIn = () => {
+    Animated.spring(animatedValue, {
+      toValue: 1,
+      friction: 7,
+      tension: 40,
+      useNativeDriver: false
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(animatedValue, {
+      toValue: 0,
+      friction: 5,
+      tension: 40,
+      useNativeDriver: false
+    }).start();
+  };
+
+  return (
+    <Pressable
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+      onHoverIn={handlePressIn}     // ← hover 진입 시
+      onHoverOut={handlePressOut}    // ← hover 이탈 시
+    >
+      <Animated.View
+        style={[
+          styles.speakerCard,
+          { width: cardWidth, margin: 7.5 },
+          isSelected && styles.selectedCard,
+          animatedStyle
+        ]}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={styles.speakerMood}>{speaker.mood}</Text>
+          <Text style={styles.speakerName}>{speaker.label}</Text>
+        </View>
+        <Image source={speaker.image} style={styles.speakerImage} />
+        <View style={styles.topTraitsContainer}>
+          {speaker.traits.slice(0, 3).map((trait, i) => (
+            <View key={i} style={styles.miniTrait}>
+              <Text style={styles.traitEmoji}>{trait.emoji}</Text>
+              <View style={styles.miniMeterBg}>
+                <View
+                  style={[
+                    styles.miniMeterFill,
+                    { width: `${trait.value}%`, backgroundColor: speaker.color },
+                  ]}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+      </Animated.View>
+    </Pressable>
+  );
+};
+
 const SpeakerSelectionScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
@@ -99,7 +213,7 @@ const SpeakerSelectionScreen = () => {
   const cardMargin = 15;
   const cardWidth = (width - cardMargin * 3) / 2; // 좌우 + 가운데 마진 3개
 
-// 같은 카드를 또 누르면 해제(toggle)
+  // 같은 카드를 또 누르면 해제(toggle)
   const handleSpeakerSelect = (speakerId: string) => {
       setSelectedSpeaker(prev => (prev === speakerId ? null : speakerId));
   };
@@ -113,36 +227,13 @@ const SpeakerSelectionScreen = () => {
   const renderSpeakersGrid = () => (
     <View style={styles.gridContainer}>
       {speakers.map(speaker => (
-        <TouchableOpacity
+        <AnimatedCard
           key={speaker.id}
-          style={[
-            styles.speakerCard,
-            { width: cardWidth, margin: cardMargin / 2 },
-            selectedSpeaker === speaker.id && styles.selectedCard,
-          ]}
+          speaker={speaker}
+          isSelected={selectedSpeaker === speaker.id}
           onPress={() => handleSpeakerSelect(speaker.id)}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={styles.speakerMood}>{speaker.mood}</Text>
-            <Text style={styles.speakerName}>{speaker.label}</Text>
-          </View>
-          <Image source={speaker.image} style={styles.speakerImage} />
-          <View style={styles.topTraitsContainer}>
-            {speaker.traits.slice(0, 3).map((trait, i) => (
-              <View key={i} style={styles.miniTrait}>
-                <Text style={styles.traitEmoji}>{trait.emoji}</Text>
-                <View style={styles.miniMeterBg}>
-                  <View
-                    style={[
-                      styles.miniMeterFill,
-                      { width: `${trait.value}%`, backgroundColor: speaker.color },
-                    ]}
-                  />
-                </View>
-              </View>
-            ))}
-          </View>
-        </TouchableOpacity>
+          cardWidth={cardWidth}
+        />
       ))}
     </View>
   );
@@ -175,7 +266,7 @@ const SpeakerSelectionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContent}>
-        <Text style={styles.headerTitle}>Select your friends!</Text>
+        <Text style={styles.headerTitle}>Select your friend!</Text>
         <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 80 }]}>
           {renderSpeakersGrid()}
           {renderSelectedSpeakerDetails()}
@@ -361,4 +452,3 @@ const styles = StyleSheet.create({
 });
 
 export default SpeakerSelectionScreen;
-
