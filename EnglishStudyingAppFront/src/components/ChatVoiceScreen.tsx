@@ -9,7 +9,9 @@ import Constants from 'expo-constants';
 import { Buffer } from 'buffer';
 import { useSession } from '../context/SessionContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+
 if (!global.Buffer) global.Buffer = Buffer;
+
 
 function base64ToBlob(base64: string, mime: string): Blob {
   const byteCharacters = atob(base64);
@@ -39,7 +41,8 @@ const ChatVoiceScreen = () => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const { sessionId } = useSession(); // sessionId 가져오기
-  const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  // const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  const API_BASE_URL = process.env.API_BASE_URL!;
   
   const navigation = useNavigation();
   const [isRecording, setIsRecording] = useState(false);
@@ -50,7 +53,7 @@ const ChatVoiceScreen = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      axios.delete(`http://${myIp}:3000/api/session/${sessionId}`)
+      axios.delete(`${API_BASE_URL}/api/session/${sessionId}`)
         .then(() => console.log("Session cleared"))
         .catch((err) => console.error("Session clear error:", err));
     });
@@ -65,7 +68,7 @@ const ChatVoiceScreen = () => {
   const performSTT = async (base64Audio: string) => {
     try {
       const response = await axios.post(
-        `http://${myIp}:3000/api/speech/stt`,
+        `${API_BASE_URL}/api/speech/stt`,
         { audio: base64Audio },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -86,7 +89,7 @@ const ChatVoiceScreen = () => {
         setLoadingMessage('');
         // 재시도
         const retryResponse = await axios.post(
-          `http://${myIp}:3000/api/speech/stt`,
+          `${API_BASE_URL}/api/speech/stt`,
           { audio: base64Audio },
           { headers: { 'Content-Type': 'application/json' } }
         );
@@ -101,7 +104,7 @@ const ChatVoiceScreen = () => {
   const performTTS = async (text: string, speaker: string) => {
     try {
       const response = await axios.post(
-        `http://${myIp}:3000/api/speech/tts`,
+        `${API_BASE_URL}/api/speech/tts`,
         { text, speaker },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -121,7 +124,7 @@ const ChatVoiceScreen = () => {
         setLoadingMessage('');
         // 재시도
         const retryResponse = await axios.post(
-          `http://${myIp}:3000/api/speech/tts`,
+          `${API_BASE_URL}/api/speech/tts`,
           { text, speaker },
           { headers: { 'Content-Type': 'application/json' } }
         );
@@ -143,7 +146,7 @@ const ChatVoiceScreen = () => {
 
       // 2. Chat: 사용자 텍스트를 이용해 AI 응답 생성
       const chatResponse = await axios.post(
-        `http://${myIp}:3000/api/chat`,
+        `${API_BASE_URL}/api/chat`,
         { message: userText, strategy: 'default', sessionId },
         { headers: { 'Content-Type': 'application/json' } }
       );

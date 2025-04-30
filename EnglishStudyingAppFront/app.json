@@ -13,16 +13,43 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.minseong99.englishstudyingappfront",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.minseong99.englishstudyingappfront"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiBaseUrl": "english-conversation-studying-appbackend-main.up.railway.app",
+      "eas": {
+        "projectId": "11f13d81-4306-4d8b-8f95-dc6af2e7052d"
+      }
+    },
+    "plugins": [
+      [
+        "expo-updates",
+        {
+          "userInterfaceStyle": "automatic"
+        }
+      ]
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/11f13d81-4306-4d8b-8f95-dc6af2e7052d",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

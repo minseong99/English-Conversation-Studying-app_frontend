@@ -8,6 +8,7 @@ import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
 import { useSession } from '../context/SessionContext';
 
+
 interface GameState {
   currentWord: string;
   hintCount: number;
@@ -40,7 +41,8 @@ const WordChainScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  // const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  const API_BASE_URL = process.env.API_BASE_URL!;
   const { sessionId } = useSession();
 
   // 게임 시작: 백엔드 /api/game/start 호출
@@ -52,7 +54,7 @@ const WordChainScreen = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://${myIp}:3000/api/game/start`,
+        `${API_BASE_URL}/api/game/start`,
         { sessionId, difficulty: 'basic' },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -91,7 +93,7 @@ const WordChainScreen = () => {
     const defaultSpeaker = 'p225';
     try {
         const ttsResponse = await axios.post(
-        `http://${myIp}:3000/api/speech/tts`,
+        `${API_BASE_URL}/api/speech/tts`,
         { text, speaker: defaultSpeaker },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -126,7 +128,7 @@ const WordChainScreen = () => {
         setLoading(false);
         setLoadingMessage('');
         const retryResponse = await axios.post(
-          `http://${myIp}:3000/api/speech/tts`,
+          `${API_BASE_URL}/api/speech/tts`,
           { text, speaker: defaultSpeaker },
           { headers: { 'Content-Type': 'application/json' } }
         );
@@ -157,7 +159,7 @@ const WordChainScreen = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://${myIp}:3000/api/game/verify`,
+        `${API_BASE_URL}/api/game/verify`,
         { sessionId, answer: userAnswer },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -195,7 +197,7 @@ const WordChainScreen = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://${myIp}:3000/api/game/hint`,
+        `${API_BASE_URL}/api/game/hint`,
         { sessionId },
         { headers: { 'Content-Type': 'application/json' } }
       );

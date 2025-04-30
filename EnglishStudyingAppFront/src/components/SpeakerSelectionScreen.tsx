@@ -66,12 +66,12 @@ const speakers: Speaker[] = [
     mood: '😐'
   },
   { 
-    id: "p226", 
-    label: "Tomas", 
+    id: "p231", 
+    label: "Jesica", 
     description: "He is on the bright side and is very playful.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    image: require('../../assets/tomas.png'),
+    image: require('../../assets/jesica.png'),
     traits: [
       { emoji: '🔥', label: 'lively', value: 90 },
       { emoji: '🧠', label: 'logical', value: 50 },
@@ -83,12 +83,12 @@ const speakers: Speaker[] = [
     mood: '😄'
   },
   { 
-    id: "p228", 
-    label: "Robert", 
+    id: "p270", 
+    label: "Soly", 
     description: "He speaks in a gentlemanly and logical manner.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    image: require('../../assets/robert.png'),
+    image: require('../../assets/soly.png'),
     traits: [
       { emoji: '🔥', label: 'lively', value: 60 },
       { emoji: '🧠', label: 'logical', value: 90 },
@@ -100,12 +100,12 @@ const speakers: Speaker[] = [
     mood: '🤔'
   },
   { 
-    id: "p229", 
-    label: "Tom", 
+    id: "p280", 
+    label: "Kitty", 
     description: "He has an easygoing personality and is a bit lazy.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    image: require('../../assets/tom.png'),
+    image: require('../../assets/kitty.png'),
     traits: [
       { emoji: '🔥', label: 'lively', value: 50 },
       { emoji: '🧠', label: 'logical', value: 30 },

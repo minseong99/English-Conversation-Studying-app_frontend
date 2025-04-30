@@ -6,6 +6,8 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSession } from '../context/SessionContext';
 import Constants from 'expo-constants';
+// **여기서 환경변수 불러오기**
+
 
 type Message = {
   id: number;
@@ -19,12 +21,14 @@ const ChatScreen = () => {
   const navigation = useNavigation();
   const { sessionId } = useSession();
 
-  const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  // const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  const API_BASE_URL = process.env.API_BASE_URL!;
+  
 
   // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
   useEffect(() => {
       const unsubscribe = navigation.addListener('beforeRemove', () => {
-        axios.delete(`http://${myIp}:3000/api/session/${sessionId}`)
+        axios.delete(`${API_BASE_URL}/api/session/${sessionId}`)
           .then(() => console.log("Session cleared"))
           .catch((err) => console.error("Session clear error:", err));
       });
@@ -34,7 +38,7 @@ const ChatScreen = () => {
   // 백엔드에서 해당 세션의 전체 대화 내역을 불러오는 함수
   const loadSessionHistory = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/session/${sessionId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/session/${sessionId}`);
       // 백엔드에서 { messages: [...] } 형태로 반환한다고 가정합니다.
       if (response.data && Array.isArray(response.data.messages)) {
         setMessages(response.data.messages);
@@ -59,7 +63,7 @@ const ChatScreen = () => {
     setInput('');
 
     try {
-      const response = await axios.post('http://localhost:3000/api/chat', {
+      const response = await axios.post(`${API_BASE_URL}/api/chat`, {
         message: input,
         sessionId,
       }, {
