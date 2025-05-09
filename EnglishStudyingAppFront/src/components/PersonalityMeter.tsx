@@ -1,4 +1,3 @@
-// src/components/PersonalityMeter.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
@@ -15,11 +14,11 @@ const Trait: React.FC<TraitProps> = ({ emoji, label, value, color }) => {
       <Text style={styles.emoji}>{emoji}</Text>
       <Text style={styles.traitLabel}>{label}</Text>
       <View style={styles.meterBackground}>
-        <View 
+        <View
           style={[
-            styles.meterFill, 
-            { width: `${value}%`, backgroundColor: color }
-          ]} 
+            styles.meterFill,
+            { width: `${value}%`, backgroundColor: color },
+          ]}
         />
       </View>
     </View>
@@ -35,11 +34,14 @@ interface PersonalityMeterProps {
   color: string;
 }
 
-const PersonalityMeter: React.FC<PersonalityMeterProps> = ({ traits, color }) => {
+const PersonalityMeter: React.FC<PersonalityMeterProps> = ({
+  traits,
+  color,
+}) => {
   return (
     <View style={styles.container}>
       {traits.map((trait, index) => (
-        <Trait 
+        <Trait
           key={index}
           emoji={trait.emoji}
           label={trait.label}

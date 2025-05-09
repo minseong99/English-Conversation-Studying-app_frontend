@@ -1,4 +1,3 @@
-// src/screens/SpeakerSelectionScreen.tsx
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -20,7 +19,6 @@ type NavigationProp = {
   navigate: (screen: string, params?: any) => void;
 };
 
-// 스피커 타입 정의
 type SpeakerTrait = {
   emoji: string;
   label: string;
@@ -39,7 +37,6 @@ type Speaker = {
   mood: string;
 };
 
-// AnimatedCard의 Props 타입 정의
 type AnimatedCardProps = {
   speaker: Speaker;
   isSelected: boolean;
@@ -48,10 +45,10 @@ type AnimatedCardProps = {
 };
 
 const speakers: Speaker[] = [
-  { 
-    id: "p225", 
-    label: "Alice", 
-    description: "She is tough and quiet.",
+  {
+    id: 'p225',
+    label: 'Alice',
+    description: 'She is tough and quiet.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/alice.png'),
@@ -60,15 +57,15 @@ const speakers: Speaker[] = [
       { emoji: '🧠', label: 'logical', value: 60 },
       { emoji: '💖', label: 'kindness', value: 40 },
       { emoji: '🧐', label: 'seriousness', value: 85 },
-      { emoji: '✨', label: 'creativity', value: 50 }
+      { emoji: '✨', label: 'creativity', value: 50 },
     ],
     color: '#FF6B6B',
-    mood: '😐'
+    mood: '😐',
   },
-  { 
-    id: "p231", 
-    label: "Jesica", 
-    description: "He is on the bright side and is very playful.",
+  {
+    id: 'p231',
+    label: 'Jesica',
+    description: 'He is on the bright side and is very playful.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/jesica.png'),
@@ -77,15 +74,15 @@ const speakers: Speaker[] = [
       { emoji: '🧠', label: 'logical', value: 50 },
       { emoji: '💖', label: 'kindness', value: 75 },
       { emoji: '🧐', label: 'seriousness', value: 25 },
-      { emoji: '✨', label: 'creativity', value: 85 }
+      { emoji: '✨', label: 'creativity', value: 85 },
     ],
     color: '#4ECDC4',
-    mood: '😄'
+    mood: '😄',
   },
-  { 
-    id: "p270", 
-    label: "Soly", 
-    description: "He speaks in a gentlemanly and logical manner.",
+  {
+    id: 'p270',
+    label: 'Soly',
+    description: 'He speaks in a gentlemanly and logical manner.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/soly.png'),
@@ -94,15 +91,15 @@ const speakers: Speaker[] = [
       { emoji: '🧠', label: 'logical', value: 90 },
       { emoji: '💖', label: 'kindness', value: 80 },
       { emoji: '🧐', label: 'seriousness', value: 75 },
-      { emoji: '✨', label: 'creativity', value: 50 }
+      { emoji: '✨', label: 'creativity', value: 50 },
     ],
     color: '#FFD166',
-    mood: '🤔'
+    mood: '🤔',
   },
-  { 
-    id: "p280", 
-    label: "Kitty", 
-    description: "He has an easygoing personality and is a bit lazy.",
+  {
+    id: 'p280',
+    label: 'Kitty',
+    description: 'He has an easygoing personality and is a bit lazy.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/kitty.png'),
@@ -111,38 +108,44 @@ const speakers: Speaker[] = [
       { emoji: '🧠', label: 'logical', value: 30 },
       { emoji: '💖', label: 'kindness', value: 75 },
       { emoji: '🧐', label: 'seriousness', value: 20 },
-      { emoji: '✨', label: 'creativity', value: 60 }
+      { emoji: '✨', label: 'creativity', value: 60 },
     ],
     color: '#6B77F8',
-    mood: '😌'
+    mood: '😌',
   },
 ];
 
-// 애니메이션을 위한 카드 컴포넌트
-const AnimatedCard = ({ speaker, isSelected, onPress, cardWidth }: AnimatedCardProps) => {
+const AnimatedCard = ({
+  speaker,
+  isSelected,
+  onPress,
+  cardWidth,
+}: AnimatedCardProps) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
-  
+
   const animatedStyle = {
     transform: [
-      { scale: animatedValue.interpolate({
+      {
+        scale: animatedValue.interpolate({
           inputRange: [0, 1],
-          outputRange: [1, 1.05] // 5% 크기 증가
-        }) 
+          outputRange: [1, 1.05],
+        }),
       },
-      { translateY: animatedValue.interpolate({
+      {
+        translateY: animatedValue.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -5] // 위로 5픽셀 이동
-        })
-      }
+          outputRange: [0, -5], 
+        }),
+      },
     ],
     shadowOpacity: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [0.1, 0.3] // 그림자 더 진하게
+      outputRange: [0.1, 0.3], 
     }),
     shadowRadius: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [3.84, 8]
-    })
+      outputRange: [3.84, 8],
+    }),
   };
 
   const handlePressIn = () => {
@@ -150,7 +153,7 @@ const AnimatedCard = ({ speaker, isSelected, onPress, cardWidth }: AnimatedCardP
       toValue: 1,
       friction: 7,
       tension: 40,
-      useNativeDriver: false
+      useNativeDriver: false,
     }).start();
   };
 
@@ -159,7 +162,7 @@ const AnimatedCard = ({ speaker, isSelected, onPress, cardWidth }: AnimatedCardP
       toValue: 0,
       friction: 5,
       tension: 40,
-      useNativeDriver: false
+      useNativeDriver: false,
     }).start();
   };
 
@@ -168,17 +171,16 @@ const AnimatedCard = ({ speaker, isSelected, onPress, cardWidth }: AnimatedCardP
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={onPress}
-      onHoverIn={handlePressIn}     // ← hover 진입 시
-      onHoverOut={handlePressOut}    // ← hover 이탈 시
+      onHoverIn={handlePressIn} 
+      onHoverOut={handlePressOut} 
     >
       <Animated.View
         style={[
           styles.speakerCard,
           { width: cardWidth, margin: 7.5 },
           isSelected && styles.selectedCard,
-          animatedStyle
-        ]}
-      >
+          animatedStyle,
+        ]}>
         <View style={styles.cardHeader}>
           <Text style={styles.speakerMood}>{speaker.mood}</Text>
           <Text style={styles.speakerName}>{speaker.label}</Text>
@@ -192,7 +194,10 @@ const AnimatedCard = ({ speaker, isSelected, onPress, cardWidth }: AnimatedCardP
                 <View
                   style={[
                     styles.miniMeterFill,
-                    { width: `${trait.value}%`, backgroundColor: speaker.color },
+                    {
+                      width: `${trait.value}%`,
+                      backgroundColor: speaker.color,
+                    },
                   ]}
                 />
               </View>
@@ -208,14 +213,12 @@ const SpeakerSelectionScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
 
-  // 항상 가로 2개씩 보여주도록 카드 너비 계산
   const { width } = useWindowDimensions();
   const cardMargin = 15;
-  const cardWidth = (width - cardMargin * 3) / 2; // 좌우 + 가운데 마진 3개
+  const cardWidth = (width - cardMargin * 3) / 2;
 
-  // 같은 카드를 또 누르면 해제(toggle)
   const handleSpeakerSelect = (speakerId: string) => {
-      setSelectedSpeaker(prev => (prev === speakerId ? null : speakerId));
+    setSelectedSpeaker((prev) => (prev === speakerId ? null : speakerId));
   };
 
   const handleStartChat = () => {
@@ -226,7 +229,7 @@ const SpeakerSelectionScreen = () => {
 
   const renderSpeakersGrid = () => (
     <View style={styles.gridContainer}>
-      {speakers.map(speaker => (
+      {speakers.map((speaker) => (
         <AnimatedCard
           key={speaker.id}
           speaker={speaker}
@@ -240,13 +243,14 @@ const SpeakerSelectionScreen = () => {
 
   const renderSelectedSpeakerDetails = () => {
     if (!selectedSpeaker) return null;
-    const speaker = speakers.find(s => s.id === selectedSpeaker)!;
+    const speaker = speakers.find((s) => s.id === selectedSpeaker)!;
     return (
       <View style={styles.detailsContainer}>
         <View style={styles.detailsHeader}>
           <View>
             <Text style={styles.detailsName}>
-              {speaker.label} <Text style={styles.detailsMood}>{speaker.mood}</Text>
+              {speaker.label}{' '}
+              <Text style={styles.detailsMood}>{speaker.mood}</Text>
             </Text>
             <Text style={styles.detailsDesc}>{speaker.description}</Text>
           </View>
@@ -255,8 +259,7 @@ const SpeakerSelectionScreen = () => {
         <PersonalityMeter traits={speaker.traits} color={speaker.color} />
         <TouchableOpacity
           style={[styles.startButton, { backgroundColor: speaker.color }]}
-          onPress={handleStartChat}
-        >
+          onPress={handleStartChat}>
           <Text style={styles.startButtonText}>Start a conversation</Text>
         </TouchableOpacity>
       </View>
@@ -267,7 +270,8 @@ const SpeakerSelectionScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContent}>
         <Text style={styles.headerTitle}>Select your friend!</Text>
-        <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 80 }]}>
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 80 }]}>
           {renderSpeakersGrid()}
           {renderSelectedSpeakerDetails()}
         </ScrollView>
@@ -276,26 +280,30 @@ const SpeakerSelectionScreen = () => {
       <View style={styles.bottomTab}>
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}
-        >
+          onPress={() => navigation.navigate('MainMenu')}>
           <Icon name="home" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Home</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}
-        >
+          onPress={() => navigation.navigate('SpeakerSelection')}>
           <Icon name="mic" size={24} color="#6B77F8" />
           <Text style={styles.tabText}>Voice</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('ChatText')}
-        >
+          onPress={() => navigation.navigate('ChatText')}>
           <Icon name="chatbubble" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('WordChain')}>
+          <Icon name="game-controller" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Games</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -318,13 +326,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 15,
-    paddingBottom: 80, // 바텀탭 높이 + 여유
+    paddingBottom: 80, 
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginHorizontal: -7.5, // 카드 margin 보정
+    marginHorizontal: -7.5, 
   },
   speakerCard: {
     backgroundColor: '#F8F8F8',

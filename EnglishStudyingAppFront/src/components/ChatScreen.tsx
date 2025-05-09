@@ -1,13 +1,18 @@
-// src/components/ChatScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSession } from '../context/SessionContext';
 import Constants from 'expo-constants';
-// **여기서 환경변수 불러오기**
-
 
 type Message = {
   id: number;
@@ -21,29 +26,27 @@ const ChatScreen = () => {
   const navigation = useNavigation();
   const { sessionId } = useSession();
 
-  // const myIp = Constants.manifest?.extra?.myIp || '192.168.124.100';
+  // const myIp = Constants.manifest?.extra?.myIp || '192.168.219.103';
   const API_BASE_URL = process.env.API_BASE_URL!;
-  
 
-  // 화면 언마운트(뒤로가기) 시 세션 삭제 API 호출
   useEffect(() => {
-      const unsubscribe = navigation.addListener('beforeRemove', () => {
-        axios.delete(`${API_BASE_URL}/api/session/${sessionId}`)
-          .then(() => console.log("Session cleared"))
-          .catch((err) => console.error("Session clear error:", err));
-      });
-      return unsubscribe;
-    }, [navigation, sessionId]);
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      axios
+        .delete(`${API_BASE_URL}/api/session/${sessionId}`)
+        .then(() => console.log('Session cleared'))
+        .catch((err) => console.error('Session clear error:', err));
+    });
+    return unsubscribe;
+  }, [navigation, sessionId]);
 
-  // 백엔드에서 해당 세션의 전체 대화 내역을 불러오는 함수
   const loadSessionHistory = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/session/${sessionId}`);
-      // 백엔드에서 { messages: [...] } 형태로 반환한다고 가정합니다.
+      const response = await axios.get(
+        `${API_BASE_URL}/api/session/${sessionId}`
+      );
       if (response.data && Array.isArray(response.data.messages)) {
         setMessages(response.data.messages);
       } else {
-        // 데이터 형식에 맞게 조정 (예: 직접 저장한 데이터라면 그대로 사용)
         setMessages(response.data ? [response.data] : []);
       }
     } catch (error) {
@@ -54,62 +57,67 @@ const ChatScreen = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = { 
-      id: Date.now(), 
-      text: input, 
-      sender: 'user' 
+    const userMessage: Message = {
+      id: Date.now(),
+      text: input,
+      sender: 'user',
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/chat`, {
-        message: input,
-        sessionId,
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/chat`,
+        {
+          message: input,
+          sessionId,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const botMessage: Message = {
         id: Date.now() + 1,
         text: response.data.pronouncedText,
         sender: 'bot',
       };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('메시지 전송 에러:', error);
     }
   };
 
-  // 컴포넌트 마운트 시, 기존 세션 내역을 불러옵니다.
   useEffect(() => {
     loadSessionHistory();
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-       
       <ScrollView style={styles.messageContainer}>
         {messages.map((message) => (
           <View
             key={message.id}
             style={[
               styles.messageWrapper,
-              message.sender === 'user' ? styles.userMessageWrapper : styles.botMessageWrapper
-            ]}
-          >
+              message.sender === 'user'
+                ? styles.userMessageWrapper
+                : styles.botMessageWrapper,
+            ]}>
             <View
               style={[
                 styles.messageBox,
-                message.sender === 'user' ? styles.userMessage : styles.botMessage
-              ]}
-            >
+                message.sender === 'user'
+                  ? styles.userMessage
+                  : styles.botMessage,
+              ]}>
               <Text
                 style={[
                   styles.messageText,
-                  message.sender === 'user' ? styles.userMessageText : styles.botMessageText
-                ]}
-              >
+                  message.sender === 'user'
+                    ? styles.userMessageText
+                    : styles.botMessageText,
+                ]}>
                 {message.text}
               </Text>
             </View>
@@ -125,36 +133,36 @@ const ChatScreen = () => {
           placeholder="Please input your message"
           placeholderTextColor="#999"
         />
-        <TouchableOpacity 
-          style={styles.sendButton} 
-          onPress={sendMessage}
-        >
+        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
           <Text style={styles.sendButtonText}>SEND</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.bottomTab}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}
-        >
+          onPress={() => navigation.navigate('MainMenu')}>
           <Icon name="home" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Home</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}
-        >
+          onPress={() => navigation.navigate('SpeakerSelection')}>
           <Icon name="mic" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Voice</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.tabButton}
-        >
+
+        <TouchableOpacity style={styles.tabButton}>
           <Icon name="chatbubble" size={24} color="#6B77F8" />
           <Text style={styles.tabText}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('WordChain')}>
+          <Icon name="game-controller" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Games</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
