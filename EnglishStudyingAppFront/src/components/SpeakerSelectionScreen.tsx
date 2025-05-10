@@ -297,6 +297,14 @@ const SpeakerSelectionScreen = () => {
           <Icon name="chatbubble" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Chat</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+        style={styles.tabButton}
+        onPress={() => navigation.navigate('WordChain')}>
+          <Icon name="game-controller" size={24} color="#9EA0A5" />
+          <Text style={styles.tabTextInactive}>Games</Text>
+        </TouchableOpacity>
+        
       </View>
     </SafeAreaView>
   );
