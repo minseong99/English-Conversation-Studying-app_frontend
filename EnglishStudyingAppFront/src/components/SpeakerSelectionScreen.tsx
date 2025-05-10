@@ -49,7 +49,7 @@ type AnimatedCardProps = {
 
 const speakers: Speaker[] = [
   { 
-    id: "p225", 
+    id: "en-US-Wavenet-D", 
     label: "Alice", 
     description: "She is tough and quiet.",
     backgroundColor: '#FFFFFF',
@@ -66,12 +66,12 @@ const speakers: Speaker[] = [
     mood: '😐'
   },
   { 
-    id: "p231", 
-    label: "Jesica", 
+    id: "en-US-Wavenet-F", 
+    label: "tom", 
     description: "He is on the bright side and is very playful.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    image: require('../../assets/jesica.png'),
+    image: require('../../assets/tom.png'),
     traits: [
       { emoji: '🔥', label: 'lively', value: 90 },
       { emoji: '🧠', label: 'logical', value: 50 },
@@ -83,7 +83,7 @@ const speakers: Speaker[] = [
     mood: '😄'
   },
   { 
-    id: "p270", 
+    id: "en-US-Wavenet-B", 
     label: "Soly", 
     description: "He speaks in a gentlemanly and logical manner.",
     backgroundColor: '#FFFFFF',
@@ -100,12 +100,12 @@ const speakers: Speaker[] = [
     mood: '🤔'
   },
   { 
-    id: "p280", 
-    label: "Kitty", 
+    id: "en-US-Wavenet-A", 
+    label: "tomas", 
     description: "He has an easygoing personality and is a bit lazy.",
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    image: require('../../assets/kitty.png'),
+    image: require('../../assets/tomas.png'),
     traits: [
       { emoji: '🔥', label: 'lively', value: 50 },
       { emoji: '🧠', label: 'logical', value: 30 },
