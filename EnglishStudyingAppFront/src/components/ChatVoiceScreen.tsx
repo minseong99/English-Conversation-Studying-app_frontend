@@ -355,52 +355,26 @@ const ChatVoiceScreen = () => {
             key={index}
             style={[
               styles.messageWrapper,
-<<<<<<< HEAD
-              message.sender === 'User'
-                ? styles.userMessageWrapper
-                : styles.botMessageWrapper,
-            ]}>
-            {message.sender === 'AI' && (
-=======
               msg.sender === 'User'
                 ? styles.userMessageWrapper
                 : styles.botMessageWrapper,
             ]}>
             {msg.sender === 'AI' && (
->>>>>>> test2
               <View style={styles.botAvatarContainer}>
                 <Icon name="volume-high" size={20} color="#6B77F8" />
               </View>
             )}
 
-<<<<<<< HEAD
-            <View
-              style={[
-                styles.messageBox,
-                message.sender === 'User'
-=======
             {showText && (<View
               style={[
                 styles.messageBox,
                 msg.sender === 'User'
->>>>>>> test2
                   ? styles.userMessage
                   : styles.botMessage,
               ]}>
               <Text
                 style={[
                   styles.messageText,
-<<<<<<< HEAD
-                  message.sender === 'User'
-                    ? styles.userMessageText
-                    : styles.botMessageText,
-                ]}>
-                {message.text}
-              </Text>
-            </View>
-
-            {message.sender === 'User' && (
-=======
                   msg.sender === 'User'
                     ? styles.userMessageText
                     : styles.botMessageText,
@@ -410,7 +384,6 @@ const ChatVoiceScreen = () => {
             </View>)}
 
             {msg.sender === 'User' && (
->>>>>>> test2
               <View style={styles.userAvatarContainer}>
                 <Icon name="mic" size={16} color="#FFFFFF" />
               </View>
@@ -418,10 +391,6 @@ const ChatVoiceScreen = () => {
           </View>
         ))}
       </ScrollView>
-<<<<<<< HEAD
-=======
-    
->>>>>>> test2
 
       <View style={styles.inputContainer}>
         <TouchableOpacity
@@ -584,11 +553,7 @@ const styles = StyleSheet.create({
   // 대화 표시/숨기기 버튼
   showToggleButton: {
     position: 'absolute',
-<<<<<<< HEAD
-    top: 10,
-=======
     bottom: 170,
->>>>>>> test2
     right: 10,
     backgroundColor: '#6B77F8',
     paddingVertical: 6,

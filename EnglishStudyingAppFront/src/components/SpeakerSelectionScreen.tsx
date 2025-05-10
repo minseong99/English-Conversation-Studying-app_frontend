@@ -45,17 +45,11 @@ type AnimatedCardProps = {
 };
 
 const speakers: Speaker[] = [
-<<<<<<< HEAD
-  {
-    id: 'p225',
-    label: 'Alice',
-    description: 'She is tough and quiet.',
-=======
+
   { 
     id: "en-US-Wavenet-D", 
     label: "Alice", 
     description: "She is tough and quiet.",
->>>>>>> test2
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/alice.png'),
@@ -69,17 +63,10 @@ const speakers: Speaker[] = [
     color: '#FF6B6B',
     mood: '😐',
   },
-<<<<<<< HEAD
-  {
-    id: 'p231',
-    label: 'Jesica',
-    description: 'He is on the bright side and is very playful.',
-=======
   { 
     id: "en-US-Wavenet-F", 
     label: "tom", 
     description: "He is on the bright side and is very playful.",
->>>>>>> test2
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/tom.png'),
@@ -93,17 +80,10 @@ const speakers: Speaker[] = [
     color: '#4ECDC4',
     mood: '😄',
   },
-<<<<<<< HEAD
-  {
-    id: 'p270',
-    label: 'Soly',
-    description: 'He speaks in a gentlemanly and logical manner.',
-=======
   { 
     id: "en-US-Wavenet-B", 
     label: "Soly", 
     description: "He speaks in a gentlemanly and logical manner.",
->>>>>>> test2
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/soly.png'),
@@ -117,17 +97,10 @@ const speakers: Speaker[] = [
     color: '#FFD166',
     mood: '🤔',
   },
-<<<<<<< HEAD
-  {
-    id: 'p280',
-    label: 'Kitty',
-    description: 'He has an easygoing personality and is a bit lazy.',
-=======
   { 
     id: "en-US-Wavenet-A", 
     label: "tomas", 
     description: "He has an easygoing personality and is a bit lazy.",
->>>>>>> test2
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/tomas.png'),
@@ -327,14 +300,6 @@ const SpeakerSelectionScreen = () => {
           <Text style={styles.tabTextInactive}>Chat</Text>
         </TouchableOpacity>
 
-<<<<<<< HEAD
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('WordChain')}>
-          <Icon name="game-controller" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Games</Text>
-        </TouchableOpacity>
-=======
         <TouchableOpacity 
         style={styles.tabButton}
         onPress={() => navigation.navigate('WordChain')}>
@@ -342,7 +307,6 @@ const SpeakerSelectionScreen = () => {
           <Text style={styles.tabTextInactive}>Games</Text>
         </TouchableOpacity>
         
->>>>>>> test2
       </View>
     </SafeAreaView>
   );

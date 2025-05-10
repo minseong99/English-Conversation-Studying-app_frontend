@@ -239,22 +239,12 @@ const WordChainScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.pageContainer}>
         <View style={styles.card}>
-<<<<<<< HEAD
-          <Text style={styles.timerLabel}>
-            남은 시간: <Text style={styles.timerValue}>{timer}초</Text>
-=======
           <Text style={styles.timerLabel}> 
             Remaining time: <Text style={styles.timerValue}>{timer}sec</Text>
->>>>>>> test2
           </Text>
 
           {gameState && (
             <View style={styles.wordContainer}>
-<<<<<<< HEAD
-              <Text style={styles.wordLabel}>현재 단어:</Text>
-=======
-              
->>>>>>> test2
               <Text style={styles.wordText}>{gameState.currentWord}</Text>
             </View>
           )}
@@ -263,11 +253,7 @@ const WordChainScreen = () => {
             style={styles.input}
             value={userAnswer}
             onChangeText={setUserAnswer}
-<<<<<<< HEAD
-            placeholder="단어를 입력하세요"
-=======
             placeholder="input your word"
->>>>>>> test2
             placeholderTextColor="#999"
             editable={!gameOver}
           />
@@ -277,11 +263,7 @@ const WordChainScreen = () => {
               style={styles.submitButton}
               onPress={handleSubmit}
               disabled={gameOver || loading}>
-<<<<<<< HEAD
-              <Text style={styles.buttonText}>정답 제출</Text>
-=======
               <Text style={styles.buttonText}>Submit</Text>
->>>>>>> test2
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -289,11 +271,7 @@ const WordChainScreen = () => {
               onPress={handleHint}
               disabled={gameOver || loading}>
               <Text style={styles.buttonText}>
-<<<<<<< HEAD
-                힌트 ({3 - (gameState?.hintCount || 0)}회 남음)
-=======
                 Hint
->>>>>>> test2
               </Text>
             </TouchableOpacity>
           </View>
@@ -313,21 +291,14 @@ const WordChainScreen = () => {
           {gameOver && (
             <View style={styles.finalScore}>
               <Text style={styles.finalScoreText}>
-<<<<<<< HEAD
-                최종 점수: {gameState?.score}
-=======
+
                 Score: {gameState?.score}
->>>>>>> test2
               </Text>
               <TouchableOpacity
                 style={styles.restartButton}
                 onPress={startGame}
                 disabled={loading}>
-<<<<<<< HEAD
-                <Text style={styles.buttonText}>게임 재시작</Text>
-=======
                 <Text style={styles.buttonText}>Restart</Text>
->>>>>>> test2
               </TouchableOpacity>
             </View>
           )}
