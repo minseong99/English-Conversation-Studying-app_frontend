@@ -158,9 +158,15 @@ const ChatScreen = () => {
           <Text style={styles.tabText}>Chat</Text>
         </TouchableOpacity>
 
+<<<<<<< HEAD
         <TouchableOpacity
           style={styles.tabButton}
           onPress={() => navigation.navigate('WordChain')}>
+=======
+        <TouchableOpacity 
+        style={styles.tabButton}
+        onPress={() => navigation.navigate('WordChain')}>
+>>>>>>> test2
           <Icon name="game-controller" size={24} color="#9EA0A5" />
           <Text style={styles.tabTextInactive}>Games</Text>
         </TouchableOpacity>
