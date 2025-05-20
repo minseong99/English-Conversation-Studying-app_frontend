@@ -137,34 +137,6 @@ const ChatScreen = () => {
           <Text style={styles.sendButtonText}>SEND</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.bottomTab}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}>
-          <Icon name="home" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}>
-          <Icon name="mic" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Voice</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabButton}>
-          <Icon name="chatbubble" size={24} color="#6B77F8" />
-          <Text style={styles.tabText}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-        style={styles.tabButton}
-        onPress={() => navigation.navigate('WordChain')}>
-          <Icon name="game-controller" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Games</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -242,26 +214,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#FFFFFF',
     fontWeight: '600',
-  },
-  bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-    paddingVertical: 10,
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-  tabText: {
-    color: '#6B77F8',
-    marginTop: 5,
-    fontSize: 12,
-  },
-  tabTextInactive: {
-    color: '#9EA0A5',
-    marginTop: 5,
-    fontSize: 12,
   },
 });
 

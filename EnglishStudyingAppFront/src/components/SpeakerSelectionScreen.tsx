@@ -45,11 +45,10 @@ type AnimatedCardProps = {
 };
 
 const speakers: Speaker[] = [
-
-  { 
-    id: "en-US-Wavenet-D", 
-    label: "Alice", 
-    description: "She is tough and quiet.",
+  {
+    id: 'en-US-Wavenet-D',
+    label: 'Alice',
+    description: 'She is tough and quiet.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/alice.png'),
@@ -63,10 +62,10 @@ const speakers: Speaker[] = [
     color: '#FF6B6B',
     mood: '😐',
   },
-  { 
-    id: "en-US-Wavenet-F", 
-    label: "tom", 
-    description: "He is on the bright side and is very playful.",
+  {
+    id: 'en-US-Wavenet-F',
+    label: 'tom',
+    description: 'He is on the bright side and is very playful.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/tom.png'),
@@ -80,10 +79,10 @@ const speakers: Speaker[] = [
     color: '#4ECDC4',
     mood: '😄',
   },
-  { 
-    id: "en-US-Wavenet-B", 
-    label: "Soly", 
-    description: "He speaks in a gentlemanly and logical manner.",
+  {
+    id: 'en-US-Wavenet-B',
+    label: 'Soly',
+    description: 'He speaks in a gentlemanly and logical manner.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/soly.png'),
@@ -97,10 +96,10 @@ const speakers: Speaker[] = [
     color: '#FFD166',
     mood: '🤔',
   },
-  { 
-    id: "en-US-Wavenet-A", 
-    label: "tomas", 
-    description: "He has an easygoing personality and is a bit lazy.",
+  {
+    id: 'en-US-Wavenet-A',
+    label: 'tomas',
+    description: 'He has an easygoing personality and is a bit lazy.',
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     image: require('../../assets/tomas.png'),
@@ -135,13 +134,13 @@ const AnimatedCard = ({
       {
         translateY: animatedValue.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -5], 
+          outputRange: [0, -5],
         }),
       },
     ],
     shadowOpacity: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [0.1, 0.3], 
+      outputRange: [0.1, 0.3],
     }),
     shadowRadius: animatedValue.interpolate({
       inputRange: [0, 1],
@@ -172,9 +171,8 @@ const AnimatedCard = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={onPress}
-      onHoverIn={handlePressIn} 
-      onHoverOut={handlePressOut} 
-    >
+      onHoverIn={handlePressIn}
+      onHoverOut={handlePressOut}>
       <Animated.View
         style={[
           styles.speakerCard,
@@ -270,43 +268,11 @@ const SpeakerSelectionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContent}>
-        <Text style={styles.headerTitle}>Select your friend!</Text>
         <ScrollView
           contentContainerStyle={[styles.scrollContent, { paddingBottom: 80 }]}>
           {renderSpeakersGrid()}
           {renderSelectedSpeakerDetails()}
         </ScrollView>
-      </View>
-
-      <View style={styles.bottomTab}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}>
-          <Icon name="home" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}>
-          <Icon name="mic" size={24} color="#6B77F8" />
-          <Text style={styles.tabText}>Voice</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('ChatText')}>
-          <Icon name="chatbubble" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-        style={styles.tabButton}
-        onPress={() => navigation.navigate('WordChain')}>
-          <Icon name="game-controller" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Games</Text>
-        </TouchableOpacity>
-        
       </View>
     </SafeAreaView>
   );
@@ -320,21 +286,15 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 15,
-  },
   scrollContent: {
     paddingHorizontal: 15,
-    paddingBottom: 80, 
+    paddingBottom: 80,
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginHorizontal: -7.5, 
+    marginHorizontal: -7.5,
   },
   speakerCard: {
     backgroundColor: '#F8F8F8',
@@ -436,28 +396,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  bottomTab: {
-    height: 60,
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-  tabText: {
-    color: '#6B77F8',
-    marginTop: 5,
-    fontSize: 12,
-  },
-  tabTextInactive: {
-    color: '#9EA0A5',
-    marginTop: 5,
-    fontSize: 12,
   },
 });
 

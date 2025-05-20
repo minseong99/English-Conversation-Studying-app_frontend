@@ -175,7 +175,6 @@ const ChatVoiceScreen = () => {
       const ttsResponse = await performTTS(aiText, speaker);
       const audioBase64 = ttsResponse.data.audio;
 
-
       if (Platform.OS === 'web') {
         const audioBlob = base64ToBlob(audioBase64, 'audio/wav');
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -236,7 +235,7 @@ const ChatVoiceScreen = () => {
         playsInSilentModeIOS: true,
       });
       const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecording(recording);
     } catch (error) {
@@ -270,8 +269,8 @@ const ChatVoiceScreen = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
-      setAudioChunks([]); 
-      recorder.start(500); 
+      setAudioChunks([]);
+      recorder.start(500);
       recorder.ondataavailable = (event: BlobEvent) => {
         if (event.data && event.data.size > 0) {
           setAudioChunks((prev) => [...prev, event.data]);
@@ -285,7 +284,6 @@ const ChatVoiceScreen = () => {
       console.error('웹 녹음 시작 에러:', error);
     }
   };
-
 
   const stopRecordingWebHandler = async () => {
     if (!mediaRecorder) return;
@@ -365,23 +363,25 @@ const ChatVoiceScreen = () => {
               </View>
             )}
 
-            {showText && (<View
-              style={[
-                styles.messageBox,
-                msg.sender === 'User'
-                  ? styles.userMessage
-                  : styles.botMessage,
-              ]}>
-              <Text
+            {showText && (
+              <View
                 style={[
-                  styles.messageText,
+                  styles.messageBox,
                   msg.sender === 'User'
-                    ? styles.userMessageText
-                    : styles.botMessageText,
+                    ? styles.userMessage
+                    : styles.botMessage,
                 ]}>
-                {msg.text}
-              </Text>
-            </View>)}
+                <Text
+                  style={[
+                    styles.messageText,
+                    msg.sender === 'User'
+                      ? styles.userMessageText
+                      : styles.botMessageText,
+                  ]}>
+                  {msg.text}
+                </Text>
+              </View>
+            )}
 
             {msg.sender === 'User' && (
               <View style={styles.userAvatarContainer}>
@@ -398,7 +398,7 @@ const ChatVoiceScreen = () => {
           onPress={handleMicPress}>
           <Icon
             name={isRecording ? 'stop-circle' : 'mic'}
-            size={30}
+            size={20}
             color="#FFFFFF"
           />
           <Text style={styles.micText}>
@@ -414,36 +414,6 @@ const ChatVoiceScreen = () => {
           {showText ? '대화 숨기기' : '대화 표시'}
         </Text>
       </TouchableOpacity>
-
-      <View style={styles.bottomTab}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}>
-          <Icon name="home" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}>
-          <Icon name="mic" size={24} color="#6B77F8" />
-          <Text style={styles.tabText}>Voice</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('ChatText')}>
-          <Icon name="chatbubble" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('WordChain')}>
-          <Icon name="game-controller" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Games</Text>
-        </TouchableOpacity>
-      </View>
 
       {loading && (
         <View style={styles.loadingOverlay}>
@@ -521,34 +491,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   // 입력(마이크) 컨테이너
   inputContainer: {
-    padding: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
   },
-  // 마이크 버튼 스타일
   micButton: {
     flexDirection: 'row',
     backgroundColor: '#6B77F8',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 30,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
   },
-  // 녹음 중 마이크 버튼 스타일
-  micButtonActive: {
-    backgroundColor: '#FF5252',
-  },
-  // 마이크 버튼 텍스트
   micText: {
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
-    marginLeft: 10,
+    marginLeft: 8,
+  },
+  micButtonActive: {
+    backgroundColor: '#FF5252',
   },
   // 대화 표시/숨기기 버튼
   showToggleButton: {
@@ -566,27 +536,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '500',
-  },
-  // 하단 탭
-  bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-    paddingVertical: 10,
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-  tabText: {
-    color: '#6B77F8',
-    marginTop: 5,
-    fontSize: 12,
-  },
-  tabTextInactive: {
-    color: '#9EA0A5',
-    marginTop: 5,
-    fontSize: 12,
   },
   // 로딩 오버레이
   loadingOverlay: {

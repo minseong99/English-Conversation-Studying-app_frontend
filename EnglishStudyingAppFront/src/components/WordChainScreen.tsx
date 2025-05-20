@@ -78,7 +78,6 @@ const WordChainScreen = () => {
     }
   };
 
-
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setTimer(30);
@@ -94,7 +93,6 @@ const WordChainScreen = () => {
       });
     }, 1000);
   };
-
 
   const playTTS = async (text: string, type: 'ai' | 'user') => {
     const defaultSpeaker = 'en-US-Wavenet-D';
@@ -155,7 +153,6 @@ const WordChainScreen = () => {
     }
   };
 
-
   function base64ToBlob(base64: string, mime: string): Blob {
     const byteCharacters = atob(base64);
     const byteNumbers = new Array(byteCharacters.length);
@@ -165,7 +162,6 @@ const WordChainScreen = () => {
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: mime });
   }
-
 
   const handleSubmit = async () => {
     if (!gameState) return;
@@ -208,7 +204,6 @@ const WordChainScreen = () => {
     }
   };
 
-
   const handleHint = async () => {
     if (!gameState) return;
     try {
@@ -239,7 +234,7 @@ const WordChainScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.pageContainer}>
         <View style={styles.card}>
-          <Text style={styles.timerLabel}> 
+          <Text style={styles.timerLabel}>
             Remaining time: <Text style={styles.timerValue}>{timer}sec</Text>
           </Text>
 
@@ -270,9 +265,7 @@ const WordChainScreen = () => {
               style={styles.hintButton}
               onPress={handleHint}
               disabled={gameOver || loading}>
-              <Text style={styles.buttonText}>
-                Hint
-              </Text>
+              <Text style={styles.buttonText}>Hint</Text>
             </TouchableOpacity>
           </View>
 
@@ -291,7 +284,6 @@ const WordChainScreen = () => {
           {gameOver && (
             <View style={styles.finalScore}>
               <Text style={styles.finalScoreText}>
-
                 Score: {gameState?.score}
               </Text>
               <TouchableOpacity
@@ -303,34 +295,6 @@ const WordChainScreen = () => {
             </View>
           )}
         </View>
-      </View>
-
-      <View style={styles.bottomTab}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}>
-          <Icon name="home" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}>
-          <Icon name="mic" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Voice</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('ChatText')}>
-          <Icon name="chatbubble" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabButton}>
-          <Icon name="game-controller" size={24} color="#6B77F8" />
-          <Text style={styles.tabText}>Games</Text>
-        </TouchableOpacity>
       </View>
 
       {loading && (
@@ -366,12 +330,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     flex: 1,
     textAlign: 'center',
-    marginRight: 24, 
+    marginRight: 24,
   },
   pageContainer: {
     flex: 1,
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
 
@@ -380,7 +344,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     width: '100%',
-    maxWidth: 500, 
+    maxWidth: 500,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -388,7 +352,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5, 
+    elevation: 5,
   },
 
   timerLabel: {
@@ -522,31 +486,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#fff',
     fontSize: 16,
-  },
-
-  bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-    paddingVertical: 10,
-    backgroundColor: '#FFFFFF',
-  },
-
-  tabButton: {
-    alignItems: 'center',
-  },
-
-  tabText: {
-    color: '#6B77F8',
-    marginTop: 5,
-    fontSize: 12,
-  },
-
-  tabTextInactive: {
-    color: '#9EA0A5',
-    marginTop: 5,
-    fontSize: 12,
   },
 });
 

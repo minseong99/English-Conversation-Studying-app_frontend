@@ -10,61 +10,57 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-
 const MainMenuScreen = () => {
-  const navigation = useNavigation();
-
   const conversationTopics = [
     {
       id: 1,
       title: 'Introducing Yourself',
-      level: 'Beginner',
+
       iconName: 'person',
     },
     {
       id: 2,
       title: 'Ordering at a Restaurant',
-      level: 'Beginner',
+
       iconName: 'restaurant',
     },
     {
       id: 3,
       title: 'Job Interview',
-      level: 'Intermediate',
+
       iconName: 'briefcase',
     },
     {
       id: 4,
       title: 'Travel Conversation',
-      level: 'Intermediate',
+
       iconName: 'airplane',
     },
     {
       id: 5,
       title: 'Business Meeting',
-      level: 'Advanced',
+
       iconName: 'business',
     },
     {
       id: 6,
       title: 'Shopping',
-      level: 'Beginner',
+
       iconName: 'cart',
     },
     {
       id: 7,
       title: 'Making Friends',
-      level: 'Intermediate',
+
       iconName: 'people',
     },
     {
       id: 8,
       title: 'At the Doctor',
-      level: 'Intermediate',
+
       iconName: 'medkit',
     },
   ];
-
 
   const usefulPhrases = [
     {
@@ -90,9 +86,6 @@ const MainMenuScreen = () => {
     { word: 'Pragmatic', meaning: '실용적인' },
   ];
 
-
-
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -111,7 +104,9 @@ const MainMenuScreen = () => {
         {/* 대화 주제 */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recomendation of topics today</Text>
+            <Text style={styles.sectionTitle}>
+              Recomendation of topics today
+            </Text>
           </View>
 
           <ScrollView
@@ -119,22 +114,22 @@ const MainMenuScreen = () => {
             showsHorizontalScrollIndicator={false}
             style={styles.topicsScroll}>
             {conversationTopics.map((topic) => (
-              <TouchableOpacity key={topic.id} style={styles.topicCard}>
+              <TouchableOpacity
+                key={topic.id}
+                style={styles.topicCard}
+                activeOpacity={1}>
                 <View
                   style={[
                     styles.topicImage,
                     {
                       backgroundColor:
-                        topic.id % 2 === 0 ? '#4ECDC4' : '#6B77F8',
+                        topic.id % 2 === 0 ? '#7DDBD5' : '#9EA5FA',
                     },
                   ]}>
                   <Icon name={topic.iconName} size={32} color="#FFFFFF" />
                 </View>
                 <View style={styles.topicInfo}>
                   <Text style={styles.topicTitle}>{topic.title}</Text>
-                  <View style={styles.levelBadge}>
-                    <Text style={styles.levelText}>{topic.level}</Text>
-                  </View>
                 </View>
               </TouchableOpacity>
             ))}
@@ -183,37 +178,6 @@ const MainMenuScreen = () => {
           </Text>
         </View>
       </ScrollView>
-
-      {/* 하단 탭 바  */}
-      <View style={styles.bottomTab}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('MainMenu')}>
-          <Icon name="home" size={24} color="#6B77F8" />
-          <Text style={styles.tabText}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('SpeakerSelection')}>
-          <Icon name="mic" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Voice</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('ChatText')}>
-          <Icon name="chatbubble" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('WordChain')}>
-          <Icon name="game-controller" size={24} color="#9EA0A5" />
-          <Text style={styles.tabTextInactive}>Games</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -246,7 +210,7 @@ const styles = StyleSheet.create({
 
   bannerContainer: {
     height: 180,
-    backgroundColor: '#6B77F8', 
+    backgroundColor: '#6B77F8',
     marginBottom: 15,
   },
   bannerContent: {
@@ -264,7 +228,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginTop: 5,
   },
- 
+
   section: {
     paddingHorizontal: 20,
     marginBottom: 25,
@@ -285,7 +249,7 @@ const styles = StyleSheet.create({
     color: '#6B77F8',
     fontSize: 14,
   },
-  // 대화 주제 
+  // 대화 주제
   topicsScroll: {
     paddingBottom: 10,
   },
@@ -294,11 +258,8 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
     overflow: 'hidden',
   },
   topicImage: {
@@ -328,7 +289,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '500',
   },
-  // 단어 스타일 
+  // 단어 스타일
   wordsScroll: {
     paddingBottom: 10,
   },
@@ -351,7 +312,7 @@ const styles = StyleSheet.create({
     color: '#666666',
     textAlign: 'center',
   },
-  // 유용한 표현 
+  // 유용한 표현
   phraseCard: {
     backgroundColor: '#F8F9FA',
     borderRadius: 12,
@@ -387,7 +348,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontStyle: 'italic',
   },
-  // 학습 팁 
+  // 학습 팁
   tipContainer: {
     backgroundColor: '#FFFAED',
     borderRadius: 12,
@@ -410,27 +371,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555555',
     lineHeight: 20,
-  },
-  // 하단 탭 
-  bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
-    paddingVertical: 10,
-  },
-  tabButton: {
-    alignItems: 'center',
-  },
-  tabText: {
-    color: '#6B77F8',
-    marginTop: 5,
-    fontSize: 12,
-  },
-  tabTextInactive: {
-    color: '#9EA0A5',
-    marginTop: 5,
-    fontSize: 12,
   },
 });
 
