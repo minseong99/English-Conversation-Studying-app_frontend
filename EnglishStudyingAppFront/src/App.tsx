@@ -12,6 +12,7 @@ import { SessionProvider } from './context/SessionContext';
 import { StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList, TabParamList } from './types/navigation';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'; // 추가
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -31,12 +32,14 @@ const HomeStack = () => {
 
 // 하단 탭 네비게이터
 const TabNavigator = () => {
+  const insets = useSafeAreaInsets(); // 추가: 안전 영역 값 가져오기
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = '';
-          const iconSize = 20; // 사용자가 18로 설정한 값 유지
+          const iconSize = 20;
 
           if (route.name === 'Home') {
             iconName = 'home';
@@ -54,14 +57,17 @@ const TabNavigator = () => {
         tabBarInactiveTintColor: '#9EA0A5',
         tabBarLabelStyle: {
           fontSize: 12,
-          // paddingBottom: 2, // 텍스트와 탭 바 하단과의 간격을 위해 필요시 추가
         },
         tabBarStyle: {
-          height: 65, // 탭 바의 높이를 65로 늘림
-          paddingTop: 5, // 아이콘/텍스트와 탭 바 상단과의 간격을 위해 추가 (옵션)
-          paddingBottom: 5, // 아이콘/텍스트와 탭 바 하단과의 간격을 위해 추가 (옵션)
+          height: 55 + insets.bottom, // 수정: 기존 높이 + 하단 안전 영역
+          paddingTop: 5,
+          paddingBottom: insets.bottom + 5, // 수정: 하단 안전 영역 + 추가 패딩
+          backgroundColor: 'white', // 필요에 따라 배경색 지정
+          borderTopWidth: 1, // 필요에 따라 상단 경계선
+          borderTopColor: '#EEEEEE', // 필요에 따라 상단 경계선 색상
         },
       })}>
+      {/* ... Tab.Screen 설정들 ... */}
       <Tab.Screen
         name="Home"
         component={HomeStack}
@@ -112,25 +118,27 @@ const TabNavigator = () => {
 
 const App = () => {
   return (
-    <SessionProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="MainTabs" component={TabNavigator} />
-          <Stack.Screen
-            name="ChatVoice"
-            component={ChatVoiceScreen}
-            options={{
-              headerShown: true,
-              title: 'Voice Chat',
-              headerTitleStyle: {
-                fontWeight: 'bold',
-                fontSize: 24,
-              },
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SessionProvider>
+    <SafeAreaProvider> {/* 추가: SafeAreaProvider로 전체 앱 감싸기 */}
+      <SessionProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen
+              name="ChatVoice"
+              component={ChatVoiceScreen}
+              options={{
+                headerShown: true,
+                title: 'Voice Chat',
+                headerTitleStyle: {
+                  fontWeight: 'bold',
+                  fontSize: 24,
+                },
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SessionProvider>
+    </SafeAreaProvider>
   );
 };
 
