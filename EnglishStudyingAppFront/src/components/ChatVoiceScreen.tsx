@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import { Buffer } from 'buffer';
 import { useSession } from '../context/SessionContext';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 if (!global.Buffer) global.Buffer = Buffer;
 
@@ -32,6 +33,7 @@ function base64ToBlob(base64: string, mime: string): Blob {
 }
 
 const ChatVoiceScreen = () => {
+  const insets = useSafeAreaInsets();
   const route = useRoute();
   const { speaker } = route.params as { speaker: string };
 
@@ -230,6 +232,7 @@ const ChatVoiceScreen = () => {
         alert('녹음 권한이 필요합니다.');
         return;
       }
+  
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -263,7 +266,6 @@ const ChatVoiceScreen = () => {
     }
   };
   
-
   const stopRecordingMobileHandler = async () => {
     if (!recording) return;
     setLoading(true);
@@ -367,7 +369,7 @@ const ChatVoiceScreen = () => {
   }, [sound]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
       <ScrollView style={styles.messageContainer}>
         {conversationHistory.map((msg, index) => (
           <View
@@ -381,6 +383,7 @@ const ChatVoiceScreen = () => {
             {msg.sender === 'AI' && (
               <View style={styles.botAvatarContainer}>
                 <Icon name="volume-high" size={20} color="#6B77F8" />
+                <Text>{msg.text}</Text>
               </View>
             )}
 
@@ -413,7 +416,11 @@ const ChatVoiceScreen = () => {
         ))}
       </ScrollView>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 10 : 10 },
+        ]}>
         <TouchableOpacity
           style={[styles.micButton, isRecording && styles.micButtonActive]}
           onPress={handleMicPress}>
@@ -515,7 +522,7 @@ const styles = StyleSheet.create({
 
   // 입력(마이크) 컨테이너
   inputContainer: {
-    paddingVertical: 10,
+    paddingTop: 10,
     paddingHorizontal: 20,
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
