@@ -234,14 +234,35 @@ const ChatVoiceScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+  
+      const recordingOptions = {
+        android: {
+          extension: '.wav',
+          outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_DEFAULT,
+          audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_PCM_16BIT,
+          sampleRate: 16000,
+          numberOfChannels: 1,
+        },
+        ios: {
+          extension: '.wav',
+          audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MAX,
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          format: Audio.RECORDING_OPTION_IOS_OUTPUT_FORMAT_LINEARPCM,
+          linearPCMBitDepth: 16,
+          linearPCMIsBigEndian: false,
+          linearPCMIsFloat: false,
+        },
+        web: {},
+      };
+  
+      const { recording } = await Audio.Recording.createAsync(recordingOptions);
       setRecording(recording);
     } catch (error) {
       console.error('모바일 녹음 시작 에러:', error);
     }
   };
+  
 
   const stopRecordingMobileHandler = async () => {
     if (!recording) return;
